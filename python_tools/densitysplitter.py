@@ -8,8 +8,9 @@ from scipy.io import FortranFile
 
 class DensitySplitter:
 
-    def __init__(self, handle, tracer_file, nrandoms=1e6, box_size,
-                 dmin, dmax, nrbins, is_box=True, ngrid=100, steps='1,2'):
+    def __init__(self, handle, tracer_file, nrandoms, box_size,
+                 dmin, dmax, nrbins, is_box=True, ngrid=100, steps='1,2',
+                 is_matter=False):
 
         steps = [int(i) for i in steps.split(',')]
 
@@ -18,6 +19,7 @@ class DensitySplitter:
         self.tracer_file = tracer_file
         self.centres_file = self.handle + '.cen.unf'
 
+        self.is_matter = is_matter
         self.is_box = is_box
         self.nrandoms = int(nrandoms)
         self.box_size = box_size
@@ -61,8 +63,10 @@ class DensitySplitter:
         vel(r), DD(R) profiles from
         the random centres.
         '''
-        fout = self.handle + '.den.unf'
-        logfile = self.handle + '.den.log'
+        if self.is_matter:
+            fout = self.handle + '.DM_den.unf'
+        else:
+            fout = self.handle + '.gal_den.unf'
 
         if self.is_box:
             binpath = sys.path[0] + '/bin/'
@@ -76,7 +80,7 @@ class DensitySplitter:
                    str(self.nrbins),
                    str(self.ngrid)]
         
-
+        logfile = self.handle + '.den.log'
         log = open(logfile, "w+")
-        subprocess.call(cmd)
+        subprocess.call(cmd, log)
 
