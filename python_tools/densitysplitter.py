@@ -82,5 +82,5 @@ class DensitySplitter:
         
         logfile = self.handle + '.den.log'
         log = open(logfile, "w+")
-        subprocess.call(cmd, log)
+        subprocess.call(cmd, stdout=log, stderr=log)
 
