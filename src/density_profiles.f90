@@ -3,15 +3,14 @@ program density_profiles
   
   integer, parameter:: dp=kind(0.d0)
   
-  real(dp) :: rgrid, boxsize, diff_vol, cum_vol, rhomed
+  real(dp) :: rgrid, boxsize, diff_vol, rhomed
   real(dp) :: disx, disy, disz, dis, vr
   real(dp) :: xvc, yvc, zvc
-  real(dp) :: velx, vely, velz, comx, comy, comz
+  real(dp) :: velx, vely, velz
   real(dp) :: rwidth, dmax, dmin
   real(dp) :: pi = 4.*atan(1.)
   
   integer*4 :: ng, nc, nrbin, rind
-  integer*4 :: id, iargc
   integer*4 :: i, ii, ix, iy, iz, ix2, iy2, iz2
   integer*4 :: indx, indy, indz, nrows, ncols
   integer*4 :: ipx, ipy, ipz, ndif
@@ -20,11 +19,13 @@ program density_profiles
   integer*4, dimension(:, :, :), allocatable :: lirst, nlirst
   integer*4, dimension(:), allocatable :: ll
   
-  real(dp), dimension(3) :: r, v
+  real(dp), dimension(3) :: r, vel
   real(dp), allocatable, dimension(:,:)  :: tracers, centres
-  real(dp), dimension(:, :), allocatable :: DD, RR, cum_DD, delta, cum_delta
-  real(dp), dimension(:, :), allocatable :: radial_vel, radial_vel2, mean_vr, std_vr
+  real(dp), dimension(:, :), allocatable :: DD, delta
+  real(dp), dimension(:, :), allocatable :: VV, VV2, mean_vr, std_vr
   real(dp), dimension(:), allocatable :: rbin, rbin_edges
+
+  logical :: has_velocity = .false.
   
   character(20), external :: str
   character(len=500) :: input_tracers, input_centres, output_den
@@ -80,6 +81,10 @@ program density_profiles
   read(10) tracers
   close(10)
   ng = nrows
+  if (ncols == 6) then
+    has_velocity = .true.
+    write(*,*) 'Tracer file includes velocities.'
+  end if
   write(*,*) 'ntracers dim: ', size(tracers, dim=1), size(tracers, dim=2)
 
   open(11, file=input_centres, status='old', form='unformatted')
@@ -91,21 +96,16 @@ program density_profiles
   nc = nrows
   write(*,*) 'ncentres dim: ', size(centres, dim=1), size(centres, dim=2)
 
-  print*, maxval(centres(1, :))
-  print*, minval(centres(1, :))
-
   allocate(rbin(nrbin))
   allocate(rbin_edges(nrbin+1))
   allocate(DD(nc, nrbin))
-  allocate(cum_DD(nc, nrbin))
-  allocate(RR(nc, nrbin))
   allocate(delta(nc, nrbin))
-  allocate(cum_delta(nc, nrbin))
-  allocate(radial_vel(nc, nrbin))
-  allocate(radial_vel2(nc, nrbin))
-  allocate(mean_vr(nc, nrbin))
-  allocate(std_vr(nc, nrbin))
-  
+  if (has_velocity) then
+    allocate(VV(nc, nrbin))
+    allocate(VV2(nc, nrbin))
+    allocate(mean_vr(nc, nrbin))
+    allocate(std_vr(nc, nrbin))
+  end if
   
   rwidth = (dmax - dmin) / nrbin
   do i = 1, nrbin + 1
@@ -158,13 +158,13 @@ program density_profiles
   write(*,*) 'Starting loop over centres...'
   
   DD = 0
-  cum_DD = 0
   delta = 0
-  cum_delta = 0
-  radial_vel = 0
-  radial_vel2 = 0
-  mean_vr = 0
-  std_vr = 0
+  if (has_velocity) then
+    VV = 0
+    VV2 = 0
+    mean_vr = 0
+    std_vr = 0
+  end if
   
   do i = 1, nc
     xvc = centres(1, i)
@@ -200,21 +200,6 @@ program density_profiles
               disy = tracers(2, ii) - yvc
               disz = tracers(3, ii) - zvc
 
-              velx = tracers(4, ii)
-              vely = tracers(5, ii)
-              velz = tracers(6, ii)
-
-              comx = (xvc + tracers(1, ii)) / 2
-              comy = (yvc + tracers(2, ii)) / 2
-              comz = (zvc + tracers(3, ii)) / 2
-  
-              if (comx .lt. -boxsize/2) comx = comx + boxsize
-              if (comx .gt. boxsize/2) comx = comx - boxsize
-              if (comy .lt. -boxsize/2) comy = comy + boxsize
-              if (comy .gt. boxsize/2) comy = comy - boxsize
-              if (comz .lt. -boxsize/2) comz = comz + boxsize
-              if (comz .gt. boxsize/2) comz = comz - boxsize
-  
               if (disx .lt. -boxsize/2) disx = disx + boxsize
               if (disx .gt. boxsize/2) disx = disx - boxsize
               if (disy .lt. -boxsize/2) disy = disy + boxsize
@@ -223,18 +208,26 @@ program density_profiles
               if (disz .gt. boxsize/2) disz = disz - boxsize
   
               r = (/ disx, disy, disz /)
-              v = (/ velx, vely, velz /)
-
               dis = norm2(r)
-              vr = dot_product(v, r) / norm2(r)
 
+              if (has_velocity) then
+                velx = tracers(4, ii)
+                vely = tracers(5, ii)
+                velz = tracers(6, ii)
+                vel = (/ velx, vely, velz /)
+                vr = dot_product(vel, r) / norm2(r)
+              end if
+                
               if (dis .gt. dmin .and. dis .lt. dmax) then
                 rind = int((dis - dmin) / rwidth + 1)
                 DD(i, rind) = DD(i, rind) + 1
-                radial_vel(i, rind) = radial_vel(i, rind) + vr
-                radial_vel2(i, rind) = radial_vel2(i, rind) + vr ** 2
-              end if
 
+                if (has_velocity) then
+                  VV(i, rind) = VV(i, rind) + vr
+                  VV2(i, rind) = VV2(i, rind) + vr ** 2
+                end if
+
+              end if
   
               if(ii.eq.lirst(ix2,iy2,iz2)) exit
   
@@ -243,26 +236,20 @@ program density_profiles
         end do
       end do
     end do
-
-
-    cum_DD(i, 1) = DD(i, 1)
-    do ii = 2, nrbin
-      cum_DD(i, ii) = cum_DD(i, ii - 1) + DD(i, ii)
-    end do
   
     do ii = 1, nrbin
 
       diff_vol = 4./3 * pi * (rbin_edges(ii+1)**3 - rbin_edges(ii)**3)
-      cum_vol = 4./3 * pi * rbin_edges(ii+1)**3
-
       delta(i, ii) = DD(i, ii) / (diff_vol * rhomed) - 1
-      cum_delta(i, ii) = cum_DD(i, ii) / (cum_vol * rhomed) - 1
-      if (DD(i, ii) .ne. 0) then
-        mean_vr(i, ii) = radial_vel(i, ii) / DD(i, ii)
-        std_vr(i, ii) = sqrt((radial_vel2(i, ii) - (radial_vel(i, ii) ** 2 / DD(i, ii))) / (DD(i, ii) - 1))
-      else
-        mean_vr(i, ii) = 0
-        std_vr(i, ii) = 0
+
+      if (has_velocity) then
+        if (DD(i, ii) .ne. 0) then
+          mean_vr(i, ii) = VV(i, ii) / DD(i, ii)
+          std_vr(i, ii) = sqrt((VV2(i, ii) - (VV(i, ii) ** 2 / DD(i, ii))) / (DD(i, ii) - 1))
+        else
+          mean_vr(i, ii) = 0
+          std_vr(i, ii) = 0
+        end if
       end if
 
     end do
@@ -274,12 +261,11 @@ program density_profiles
   open(12, file=output_den, status='replace', form='unformatted')
 
   write(12) nc
-  write(12) size(rbin, dim=1)
+  write(12) size(rbin)
   write(12) rbin
   write(12) DD
   write(12) delta
-  write(12) cum_delta
-  write(12) mean_vr
+  if (has_velocity) write(12) mean_vr
 
   end program density_profiles
   
