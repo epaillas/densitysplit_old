@@ -6,15 +6,15 @@ MLIBS = -lm
 
 #################
 
-EXES = density_profiles.exe
+EXES = CCF_monopole.exe
 
 all: $(EXES)
 
-density_profiles.exe: density_profiles.o
-	$(FC) density_profiles.o -o density_profiles.exe $(MLIBS)
+CCF_monopole.exe: CCF_monopole.o
+	$(FC) CCF_monopole.o -o CCF_monopole.exe $(MLIBS)
 
-density_profiles.o: density_profiles.f90
-	$(FC) -c density_profiles.f90
+CCF_monopole.o: CCF_monopole.f90
+	$(FC) -c CCF_monopole.f90
 
 install: $(EXES)
 	mv $(EXES) ../bin
