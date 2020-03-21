@@ -1,27 +1,31 @@
 from python_tools.densitysplitter import DensitySplitter
-import argparse
+import click
 
-parser = argparse.ArgumentParser(description='Density splitter.')
+@click.command()
+@click.option('--handle', type=str, required=True)
+@click.option('--tracer_file', type=str, required=True)
+@click.option('--centres_file', type=str, required=True)
+@click.option('--nrandoms', type=int, required=True)
+@click.option('--box_size', type=float, required=True)
+@click.option('--is_matter', type=bool, default=False)
+@click.option('--dmin', type=float, default=0)
+@click.option('--dmax', type=float, default=100)
+@click.option('--nrbins', type=int, default=50)
 
-parser.add_argument('--handle', type=str, required=True)
-parser.add_argument('--tracer_file', type=str, required=True)
-parser.add_argument('--centres_file', type=str, required=True)
-parser.add_argument('--nrandoms', type=int, required=True)
-parser.add_argument('--box_size', type=float, required=True)
-parser.add_argument('--is_matter', type=bool, default=False)
-parser.add_argument('--dmin', type=float, default=0)
-parser.add_argument('--dmax', type=float, default=100)
-parser.add_argument('--nrbins', type=int, default=50)
+def run_density_splitter(handle, tracer_file, centres_file,
+                         nrandoms, box_size, is_matter,
+                         dmin, dmax, nrbins):
 
-args = parser.parse_args()  
+    ds = DensitySplitter(handle=handle,
+                        tracer_file=tracer_file,
+                        centres_file=centres_file,
+                        nrandoms=nrandoms,
+                        box_size=box_size,
+                        is_matter=is_matter,
+                        dmin=dmin,
+                        dmax=dmax,
+                        nrbins=nrbins)
 
-ds = DensitySplitter(handle=args.handle,
-                     tracer_file=args.tracer_file,
-                     centres_file=args.centres_file,
-                     nrandoms=args.nrandoms,
-                     box_size=args.box_size,
-                     is_matter=args.is_matter,
-                     dmin=args.dmin,
-                     dmax=args.dmax,
-                     nrbins=args.nrbins)
 
+if __name__ == '__main__':
+    run_density_splitter()
