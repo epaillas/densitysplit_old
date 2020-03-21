@@ -74,7 +74,7 @@ class DensitySplitter:
 
         if self.is_box:
             binpath = sys.path[0] + '/bin/'
-            cmd = [binpath + 'density_profiles.exe',
+            cmd = [binpath + 'CCF_monopole.exe',
                    self.tracer_file,
                    self.centres_file,
                    fout,
