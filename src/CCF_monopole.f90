@@ -4,7 +4,7 @@ program density_profiles
   integer, parameter:: dp=kind(0.d0)
   
   real(dp) :: rgrid, boxsize, diff_vol, cum_vol, rhomed
-  real(dp) :: disx, disy, disz, dis, vr
+  real(dp) :: disx, disy, disz, dis, vr, vlos
   real(dp) :: xvc, yvc, zvc
   real(dp) :: velx, vely, velz
   real(dp) :: rwidth, dmax, dmin
@@ -19,10 +19,10 @@ program density_profiles
   integer*4, dimension(:, :, :), allocatable :: lirst, nlirst
   integer*4, dimension(:), allocatable :: ll
   
-  real(dp), dimension(3) :: r, vel
+  real(dp), dimension(3) :: r, vel, com
   real(dp), allocatable, dimension(:,:)  :: tracers, centres
-  real(dp), dimension(:, :), allocatable :: DD, RR, cum_DD, delta, cum_delta
-  real(dp), dimension(:, :), allocatable :: VV, VV2, mean_vr, std_vr
+  real(dp), dimension(:, :), allocatable :: DD, cum_DD, delta, cum_delta
+  real(dp), dimension(:, :), allocatable :: VV_r, VV_los, VV2_los, mean_vr, std_vlos
   real(dp), dimension(:), allocatable :: rbin, rbin_edges
 
   logical :: has_velocity = .false.
@@ -100,14 +100,14 @@ program density_profiles
   allocate(rbin_edges(nrbin + 1))
   allocate(DD(nc, nrbin))
   allocate(cum_DD(nc, nrbin))
-  allocate(RR(nc, nrbin))
   allocate(delta(nc, nrbin))
   allocate(cum_delta(nc, nrbin))
   if (has_velocity) then
-    allocate(VV(nc, nrbin))
-    allocate(VV2(nc, nrbin))
+    allocate(VV_r(nc, nrbin))
+    allocate(VV_los(nc, nrbin))
+    allocate(VV2_los(nc, nrbin))
     allocate(mean_vr(nc, nrbin))
-    allocate(std_vr(nc, nrbin))
+    allocate(std_vlos(nc, nrbin))
   end if
   
   
@@ -166,10 +166,11 @@ program density_profiles
   delta = 0
   cum_delta = 0
   if (has_velocity) then
-    VV = 0
-    VV2 = 0
+    VV_r = 0
+    VV_los = 0
+    VV2_los = 0
     mean_vr = 0
-    std_vr = 0
+    std_vlos = 0
   end if
   
   do i = 1, nc
@@ -221,7 +222,9 @@ program density_profiles
                 vely = tracers(5, ii)
                 velz = tracers(6, ii)
                 vel = (/ velx, vely, velz /)
+                com = (/ 0, 0, 1 /)
                 vr = dot_product(vel, r) / norm2(r)
+                vlos = dot_product(vel, com)
               end if
 
               if (dis .gt. dmin .and. dis .lt. dmax) then
@@ -229,8 +232,9 @@ program density_profiles
                 DD(i, rind) = DD(i, rind) + 1
 
                 if (has_velocity) then
-                  VV(i, rind) = VV(i, rind) + vr
-                  VV2(i, rind) = VV2(i, rind) + vr ** 2
+                  VV_r(i, rind) = VV_r(i, rind) + vr
+                  VV_los(i, rind) = VV_los(i, rind) + vlos
+                  VV2_los(i, rind) = VV2_los(i, rind) + vlos**2
                 end if
               end if
 
@@ -259,11 +263,11 @@ program density_profiles
 
       if (has_velocity) then
         if (DD(i, ii) .ne. 0) then
-          mean_vr(i, ii) = VV(i, ii) / DD(i, ii)
-          std_vr(i, ii) = sqrt((VV2(i, ii) - (VV(i, ii) ** 2 / DD(i, ii))) / (DD(i, ii) - 1))
+          mean_vr(i, ii) = VV_r(i, ii) / DD(i, ii)
+          std_vlos(i, ii) = sqrt((VV2_los(i, ii) - (VV_los(i, ii) ** 2 / DD(i, ii))) / (DD(i, ii) - 1))
         else
           mean_vr(i, ii) = 0
-          std_vr(i, ii) = 0
+          std_vlos(i, ii) = 0
         end if
       end if
 
@@ -281,7 +285,10 @@ program density_profiles
   write(12) DD
   write(12) delta
   write(12) cum_delta
-  if (has_velocity) write(12) mean_vr
+  if (has_velocity) then
+    write(12) mean_vr
+    write(12) std_vlos
+  end if
 
   end program density_profiles
   
