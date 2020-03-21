@@ -8,16 +8,15 @@ from scipy.io import FortranFile
 
 class DensitySplitter:
 
-    def __init__(self, handle, tracer_file, nrandoms, box_size,
-                 dmin, dmax, nrbins, is_box=True, ngrid=100, steps='1,2',
-                 is_matter=False):
+    def __init__(self, handle, tracer_file, centres_file, nrandoms, box_size,
+                 dmin, dmax, nrbins, is_box=True, ngrid=100, is_matter=False):
 
         steps = [int(i) for i in steps.split(',')]
 
         # file names
         self.handle = handle
         self.tracer_file = tracer_file
-        self.centres_file = self.handle + '.cen.unf'
+        self.centres_file = centres_file
 
         self.is_matter = is_matter
         self.is_box = is_box
@@ -29,11 +28,13 @@ class DensitySplitter:
         self.ngrid = ngrid
         self.steps = steps
 
-        if 1 in self.steps:
+        if os.path.isfile(self.centres_file):
+            print('Centres file found. Skipping random centre generation.')
+        else:
             self.GenerateRandomPoints()
 
-        if 2 in self.steps:
-            self.DensityProfiles()
+        print('Calculating density/velocity profiles.')
+        self.DensityProfiles()
 
     def GenerateRandomPoints(self):
         '''
