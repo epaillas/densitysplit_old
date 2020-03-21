@@ -11,8 +11,6 @@ class DensitySplitter:
     def __init__(self, handle, tracer_file, centres_file, nrandoms, box_size,
                  dmin, dmax, nrbins, is_box=True, ngrid=100, is_matter=False):
 
-        steps = [int(i) for i in steps.split(',')]
-
         # file names
         self.handle = handle
         self.tracer_file = tracer_file
@@ -26,7 +24,6 @@ class DensitySplitter:
         self.dmax = dmax
         self.nrbins = nrbins
         self.ngrid = ngrid
-        self.steps = steps
 
         if os.path.isfile(self.centres_file):
             print('Centres file found. Skipping random centre generation.')
