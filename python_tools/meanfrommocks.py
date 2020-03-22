@@ -46,7 +46,7 @@ def mean_from_mocks(handle_in,
 
         fmt = np.shape(cout)[1] * '%10.3f '
 
-        np.savetxt(hout, cout)
+        np.savetxt(hout, cout, fmt=fmt)
 
 if __name__ == '__main__':
     mean_from_mocks()
