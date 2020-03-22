@@ -10,14 +10,14 @@ program density_profiles
   real(dp) :: rwidth, dmax, dmin
   real(dp) :: pi = 4.*atan(1.)
   
-  integer*4 :: ng, nc, nrbin, rind
-  integer*4 :: i, ii, ix, iy, iz, ix2, iy2, iz2
-  integer*4 :: indx, indy, indz, nrows, ncols
-  integer*4 :: ipx, ipy, ipz, ndif
-  integer*4 :: ngrid
+  integer*8 :: ng, nc, nrbin, rind
+  integer*8 :: i, ii, ix, iy, iz, ix2, iy2, iz2
+  integer*8 :: indx, indy, indz, nrows, ncols
+  integer*8 :: ipx, ipy, ipz, ndif
+  integer*8 :: ngrid
   
-  integer*4, dimension(:, :, :), allocatable :: lirst, nlirst
-  integer*4, dimension(:), allocatable :: ll
+  integer*8, dimension(:, :, :), allocatable :: lirst, nlirst
+  integer*8, dimension(:), allocatable :: ll
   
   real(dp), dimension(3) :: r, vel, com
   real(dp), allocatable, dimension(:,:)  :: tracers, centres
@@ -262,7 +262,7 @@ program density_profiles
       cum_delta(i, ii) = cum_DD(i, ii) / (cum_vol * rhomed) - 1
 
       if (has_velocity) then
-        if (DD(i, ii) .ne. 0) then
+        if (DD(i, ii) .gt. 1) then
           mean_vr(i, ii) = VV_r(i, ii) / DD(i, ii)
           std_vlos(i, ii) = sqrt((VV2_los(i, ii) - (VV_los(i, ii) ** 2 / DD(i, ii))) / (DD(i, ii) - 1))
         else
