@@ -4,9 +4,9 @@ import click
 
 @click.command()
 
-@click.argument('--handle_in', type=str, required=True)
-@click.argument('--handle_out', type=str, required=True)
-@click.argument('--has_velocity', type=bool, required=True)
+@click.option('--handle_in', type=str, required=True)
+@click.option('--handle_out', type=str, required=True)
+@click.option('--has_velocity', type=bool, required=True)
 
 def mean_from_mocks(handle_in,
                     handle_out,
