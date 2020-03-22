@@ -1,9 +1,6 @@
 import numpy as np
 from scipy.io import FortranFile
-import matplotlib.pyplot as plt
-import sys
 import click
-plt.style.use('enrique')
 
 # read file name from command line
 @click.command()

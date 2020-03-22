@@ -11,7 +11,7 @@ has_velocity=True
 handle=den_cats/Galaxies_HOD_"$NMOCK"_z0.57_Real
 
 
-python split_densities.py \
+python $HOME/code/density_splitter/python_tools/split_densities.py \
 --gal_den_file "$gal_den_file" \
 --dm_den_file "$dm_den_file" \
 --has_velocity "$has_velocity" \
