@@ -44,3 +44,6 @@ def mean_from_mocks(handle_in,
         print('np.shape(cout): {}'.format(np.shape(cout)))
 
         np.savetxt(hout, cout)
+
+if __name__ == '__main__':
+    mean_from_mocks()
