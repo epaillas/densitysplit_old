@@ -25,6 +25,7 @@ def mean_from_mocks(handle_in,
 
     # loop over all mocks and calculate mean
     for ext in corr_type:
+        print('Averaging extension: {}'.format(ext))
         hin = handle_in + '.{}'.format(ext)
         hout = handle_out + '.{}'.format(ext)
 
