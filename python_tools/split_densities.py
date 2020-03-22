@@ -17,6 +17,13 @@ def split_densities(gal_den_file,
                          has_velocity,
                          handle):
 
+
+    print('\nSplitting densities for the following arguments:')
+    print('gal_den_file: {}'.format(gal_den_file))
+    print('dm_den_file: {}'.format(dm_den_file))
+    print('has_velocity: {}'.format(has_velocity))
+    print('handle: {}'.format(handle))
+
     # open galaxy density file and get dimensions
     f = FortranFile(gal_den_file, 'r')
     ncentres = f.read_ints()[0]
@@ -117,7 +124,6 @@ def split_densities(gal_den_file,
         np.savetxt(gal_delta_file, np.c_[rbin, gal_delta['den{}'.format(i)]], fmt=fmt)
         np.savetxt(gal_vr_file, np.c_[rbin, gal_vr['den{}'.format(i)]], fmt=fmt)
         np.savetxt(gal_sv_los_file, np.c_[rbin, gal_sv_los['den{}'.format(i)]], fmt=fmt)
-
 
 
 
