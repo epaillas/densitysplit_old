@@ -44,6 +44,8 @@ def mean_from_mocks(handle_in,
         print('np.shape(data_list): {}'.format(np.shape(data_list)))
         print('np.shape(cout): {}'.format(np.shape(cout)))
 
+        fmt = np.shape(cout)[1] * '%10.3f '
+
         np.savetxt(hout, cout)
 
 if __name__ == '__main__':
