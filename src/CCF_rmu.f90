@@ -95,6 +95,7 @@ program density_profiles
   nc = nrows
   write(*,*) 'ncentres dim: ', size(centres, dim=1), size(centres, dim=2)
 
+  nmubin = nrbin
   allocate(rbin(nrbin))
   allocate(mubin(nmubin))
   allocate(rbin_edges(nrbin + 1))
