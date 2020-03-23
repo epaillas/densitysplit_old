@@ -269,6 +269,8 @@ program density_profiles
   open(12, file=output_den, status='replace', form='unformatted')
 
   write(12) nc
+  write(12) size(rbin)
+  write(12) size(mubin)
   write(12) rbin
   write(12) mubin
   write(12) DD
