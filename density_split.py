@@ -11,10 +11,13 @@ import click
 @click.option('--dmin', type=float, default=0)
 @click.option('--dmax', type=float, default=100)
 @click.option('--nrbins', type=int, default=50)
+@click.option('--get_monopole', type=bool, default=True)
+@click.option('--get_rmu', type=bool, default=False)
 
 def run_density_splitter(handle, tracer_file, centres_file,
                          nrandoms, box_size, is_matter,
-                         dmin, dmax, nrbins):
+                         dmin, dmax, nrbins,
+                         get_monopole, get_rmu):
 
     ds = DensitySplitter(handle=handle,
                         tracer_file=tracer_file,
@@ -24,7 +27,9 @@ def run_density_splitter(handle, tracer_file, centres_file,
                         is_matter=is_matter,
                         dmin=dmin,
                         dmax=dmax,
-                        nrbins=nrbins)
+                        nrbins=nrbins,
+                        get_monopole=get_monopole,
+                        get_rmu=get_rmu)
 
 
 if __name__ == '__main__':

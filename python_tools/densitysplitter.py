@@ -9,13 +9,16 @@ from scipy.io import FortranFile
 class DensitySplitter:
 
     def __init__(self, handle, tracer_file, centres_file, nrandoms, box_size,
-                 dmin, dmax, nrbins, is_box=True, ngrid=100, is_matter=False):
+                 dmin, dmax, nrbins, is_box=True, ngrid=100, is_matter=False,
+                 get_monopole=True, get_rmu=False):
 
         # file names
         self.handle = handle
         self.tracer_file = tracer_file
         self.centres_file = centres_file
 
+        self.get_monopole = get_monopole
+        self.get_rmu = get_rmu
         self.is_matter = is_matter
         self.is_box = is_box
         self.nrandoms = int(nrandoms)
@@ -37,7 +40,11 @@ class DensitySplitter:
             self.GenerateRandomPoints()
 
         print('Calculating density/velocity profiles.')
-        self.DensityProfiles()
+        if self.get_monopole:
+            self.CCF_monopole()
+        if self.get_rmu:
+            self.CCF_rmu()
+
 
     def GenerateRandomPoints(self):
         '''
@@ -61,16 +68,18 @@ class DensitySplitter:
 
         return
 
-    def DensityProfiles(self):
+    def CCF_monopole(self):
         '''
         Computes delta(r), Delta(r),
         vel(r), DD(R) profiles from
         the random centres.
         '''
         if self.is_matter:
-            fout = self.handle + '.DM_den.unf'
+            fout = self.handle + '.CCF_DM_monopole.unf'
+            logfile = self.handle + '.CCF_DM_monopole.log'
         else:
-            fout = self.handle + '.gal_den.unf'
+            fout = self.handle + '.CCF_gal_monole.unf'
+            logfile = self.handle + '.CCF_gal_monopole.log'
 
         if self.is_box:
             binpath = sys.path[0] + '/bin/'
@@ -84,7 +93,34 @@ class DensitySplitter:
                    str(self.nrbins),
                    str(self.ngrid)]
         
-        logfile = self.handle + '.den.log'
+        log = open(logfile, "w+")
+        subprocess.call(cmd, stdout=log, stderr=log)
+
+    def CCF_rmu(self):
+        '''
+        Computes delta(r), Delta(r),
+        DD(R) profiles from
+        the random centres.
+        '''
+        if self.is_matter:
+            fout = self.handle + '.CCF_DM_rmu.unf'
+            logfile = self.handle + '.CCF_DM_rmu.log'
+        else:
+            fout = self.handle + '.CCF_gal_rmu.unf'
+            logfile = self.handle + '.CCF_gal_rmu.log'
+
+        if self.is_box:
+            binpath = sys.path[0] + '/bin/'
+            cmd = [binpath + 'CCF_rmu.exe',
+                   self.tracer_file,
+                   self.centres_file,
+                   fout,
+                   str(self.box_size),
+                   str(self.dmin),
+                   str(self.dmax),
+                   str(self.nrbins),
+                   str(self.ngrid)]
+        
         log = open(logfile, "w+")
         subprocess.call(cmd, stdout=log, stderr=log)
 
