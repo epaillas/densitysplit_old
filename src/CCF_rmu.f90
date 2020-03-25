@@ -206,17 +206,6 @@ program density_profiles
               disy = tracers(2, ii) - yvc
               disz = tracers(3, ii) - zvc
 
-              comx = (xvc + tracers(1, ii)) / 2
-              comy = (yvc + tracers(2, ii)) / 2
-              comz = (zvc + tracers(3, ii)) / 2
-
-              if (comx .lt. -boxsize/2) comx = comx + boxsize
-              if (comx .gt. boxsize/2) comx = comx - boxsize
-              if (comy .lt. -boxsize/2) comy = comy + boxsize
-              if (comy .gt. boxsize/2) comy = comy - boxsize
-              if (comz .lt. -boxsize/2) comz = comz + boxsize
-              if (comz .gt. boxsize/2) comz = comz - boxsize
-
               if (disx .lt. -boxsize/2) disx = disx + boxsize
               if (disx .gt. boxsize/2) disx = disx - boxsize
               if (disy .lt. -boxsize/2) disy = disy + boxsize
