@@ -78,7 +78,7 @@ class DensitySplitter:
             fout = self.handle + '.CCF_DM_monopole.unf'
             logfile = self.handle + '.CCF_DM_monopole.log'
         else:
-            fout = self.handle + '.CCF_gal_monole.unf'
+            fout = self.handle + '.CCF_gal_monopole.unf'
             logfile = self.handle + '.CCF_gal_monopole.log'
 
         if self.is_box:

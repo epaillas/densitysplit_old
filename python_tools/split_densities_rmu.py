@@ -43,7 +43,6 @@ def split_densities(gal_den_monopole, gal_den_rmu, handle):
 
     # read raw data and close file
     rbin = f.read_reals(dtype=np.float64)
-    mubin = f.read_reals(dtype=np.float64).reshape(nrbins,  ncentres).T
     dd = f.read_reals(dtype=np.float64).reshape(nrbins, ncentres).T
     xi_r = f.read_reals(dtype=np.float64).reshape(nrbins, ncentres).T
     xibar_r = f.read_reals(dtype=np.float64).reshape(nrbins, ncentres).T
