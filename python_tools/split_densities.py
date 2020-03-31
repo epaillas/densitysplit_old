@@ -35,6 +35,7 @@ def split_densities(gal_den_file,
     gal_delta = f.read_reals(dtype=np.float64).reshape(nbins, ncentres)
     gal_cumdelta = f.read_reals(dtype=np.float64).reshape(nbins, ncentres)
 
+
     if has_velocity:
         gal_vr = f.read_reals(dtype=np.float64).reshape(nbins, ncentres)
         gal_sv_los = f.read_reals(dtype=np.float64).reshape(nbins, ncentres)
