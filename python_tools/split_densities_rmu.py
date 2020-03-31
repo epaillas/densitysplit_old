@@ -81,7 +81,7 @@ def split_densities(gal_den_monopole, gal_den_rmu, handle):
 
     for i in range(1,6):
         xi_rmu_file = handle + '_den{}'.format(i) + '.CCF_rmu'
-        xi_rmu_out = np.c_[bins, xi_rmu_mean['_den{}'.format(i)]]
+        xi_rmu_out = np.c_[bins, xi_rmu_mean['den{}'.format(i)]]
 
         fmt = 3*'%10.3f '
         np.savetxt(xi_rmu_file, xi_rmu_out, fmt=fmt)
