@@ -69,7 +69,7 @@ def split_densities(gal_den_monopole, gal_den_rmu, handle):
         xi_rmu_mean['den{}'.format(i)] = np.mean(den, axis=0)
 
     # save split profiles to file
-    bins = np.zeros(nrbins * nmubins, 2)
+    bins = np.zeros([nrbins * nmubins, 2])
     count = 0
     for i in range(nrbins):
         for j in range(nmubins):
