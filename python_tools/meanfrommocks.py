@@ -1,16 +1,19 @@
 import numpy as np
 import glob
 import click
+import sys
 
 @click.command()
 
 @click.option('--handle_in', type=str, required=True)
 @click.option('--handle_out', type=str, required=True)
 @click.option('--has_velocity', type=bool, required=True)
+@click.option('--corr_type', type=str, default='monopole')
 
 def mean_from_mocks(handle_in,
                     handle_out,
-                    has_velocity):
+                    has_velocity,
+                    corr_type):
 
     print('\nAveraging mean from mocks for the following arguments:')
     print('handle_in: {}'.format(handle_in))
@@ -18,13 +21,18 @@ def mean_from_mocks(handle_in,
     print('has_velocity: {}'.format(has_velocity))
 
     # possible file extensions
-    corr_type = ['CCF_gal_monopole', 'CCF_DM_monopole']
+    if corr_type == 'monopole':
+        file_ext = ['CCF_gal_monopole', 'CCF_DM_monopole']
+    elif corr_type =='rmu':
+        file_ext = ['CCF_gal_rmu']
+    else:
+        sys.exit('Correlation type not recognized.')
 
     if has_velocity:
-        corr_type = corr_type + ['CCF_gal_monopole', 'CCF_DM_monopole', 'CCF_gal_vr', 'CCF_gal_svlos']
+        file_ext = file_ext + ['CCF_gal_vr', 'CCF_gal_svlos']
 
     # loop over all mocks and calculate mean
-    for ext in corr_type:
+    for ext in file_ext:
         print('\nAveraging extension: {}'.format(ext))
         hin = handle_in + '.{}'.format(ext)
         hout = handle_out + '.{}'.format(ext)
