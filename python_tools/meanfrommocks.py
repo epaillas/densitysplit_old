@@ -7,18 +7,18 @@ import sys
 
 @click.option('--handle_in', type=str, required=True)
 @click.option('--handle_out', type=str, required=True)
-@click.option('--has_velocity', type=bool, required=True)
+@click.option('--is_velocity', type=bool, required=True)
 @click.option('--corr_type', type=str, default='monopole')
 
 def mean_from_mocks(handle_in,
                     handle_out,
-                    has_velocity,
+                    is_velocity,
                     corr_type):
 
     print('\nAveraging mean from mocks for the following arguments:')
     print('handle_in: {}'.format(handle_in))
     print('handle_out: {}'.format(handle_out))
-    print('has_velocity: {}'.format(has_velocity))
+    print('is_velocity: {}'.format(is_velocity))
 
     # possible file extensions
     if corr_type == 'monopole':
@@ -28,8 +28,8 @@ def mean_from_mocks(handle_in,
     else:
         sys.exit('Correlation type not recognized.')
 
-    if has_velocity:
-        file_ext = file_ext + ['CCF_gal_vr', 'CCF_gal_svlos']
+    if is_velocity:
+        file_ext = ['CCF_gal_vr', 'CCF_gal_svlos']
 
     # loop over all mocks and calculate mean
     for ext in file_ext:
