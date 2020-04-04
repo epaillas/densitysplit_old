@@ -48,14 +48,14 @@ def mean_from_mocks(handle_in,
             data_list.append(data)
 
         data_list = np.asarray(data_list)
-        cout = np.mean(data_list, axis=0)
+        data_mean = np.mean(data_list, axis=0)
 
         print('np.shape(data_list): {}'.format(np.shape(data_list)))
-        print('np.shape(cout): {}'.format(np.shape(cout)))
+        print('np.shape(data_mean): {}'.format(np.shape(data_mean)))
 
-        fmt = np.shape(cout)[1] * '%10.3f '
+        fmt = np.shape(data_mean)[1] * '%10.3f '
 
-        np.savetxt(hout, cout, fmt=fmt)
+        np.savetxt(hout, data_mean, fmt=fmt)
 
 if __name__ == '__main__':
     mean_from_mocks()

@@ -9,7 +9,7 @@ from scipy.interpolate import InterpolatedUnivariateSpline
 def readCorrFile(fname):
     data = np.genfromtxt(fname)
     s = np.unique(data[:,0])
-    mu = np.unique(data[:,3])
+    mu = np.unique(data[:,1])
 
     xi_smu = np.zeros([len(s), len(mu)])
     counter = 0
@@ -104,7 +104,7 @@ def MultipoleCovariance(handle_mocks, smin, smax):
             xi0 = xi0[idx]
             xi2 = xi2[idx]
 
-            datavec = np.concatenate(xi0, xi2)
+            datavec = np.concatenate((xi0, xi2))
             mock_datavec.append(datavec)
 
         mock_datavec = np.asarray(mock_datavec)
