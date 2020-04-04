@@ -8,6 +8,7 @@ import sys
 @click.option('--handle_in', type=str, required=True)
 @click.option('--handle_out', type=str, required=True)
 @click.option('--is_velocity', type=bool, required=True)
+@click.option('--is_matter', type=bool, required=True)
 @click.option('--corr_type', type=str, default='monopole')
 
 def mean_from_mocks(handle_in,

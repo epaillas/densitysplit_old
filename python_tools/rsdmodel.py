@@ -5,7 +5,7 @@ import os
 import glob
 import subprocess
 from astropy.io import fits
-from python_tools.cosmology import Cosmology
+from cosmology import Cosmology
 from scipy.integrate import quad, simps
 from scipy.interpolate import RectBivariateSpline, InterpolatedUnivariateSpline, interp1d
 import emcee
@@ -21,22 +21,19 @@ import time
 
 class RSDModel:
     '''
-    Void-galaxy RSD model presented
-    in Cai et al. (2016).
+    Nadathur & Percival RSD model
     '''
 
     def __init__(self, delta_r_file, xi_r_file, sv_file, xi_smu_file,
-                 covmat_file, xi_smu_mocks=''):
+                 covmat_file):
 
         self.delta_r_file = delta_r_file
         self.xi_r_file = xi_r_file
         self.sv_file = sv_file
         self.xi_smu_file = xi_smu_file
         self.covmat_file = covmat_file
-        self.xi_smu_mocks = xi_smu_mocks
 
         self.full_fit = False
-
 
         print("Setting up redshift-space distortions model.")
 
@@ -56,16 +53,14 @@ class RSDModel:
         eofz = np.sqrt((self.om_m * (1 + self.eff_z) ** 3 + 1 - self.om_m))
         self.iaH = (1 + self.eff_z) / (100. * eofz) 
 
-        # # build covariance matrix
-        # if os.path.isfile(self.covmat_file):
-        #     print('Reading covariance matrix: ' + self.covmat_file)
-        #     self.cov = np.load(self.covmat_file)
-        # else:
-        #     print('Computing covariance matrix...')
-        #     self.cov = self.MultipoleCovariance()
-        #     np.save(self.covmat_file, self.cov)
+        # build covariance matrix
+        if os.path.isfile(self.covmat_file):
+            print('Reading covariance matrix: ' + self.covmat_file)
+            self.cov = np.load(self.covmat_file)
+        else:
+            sys.exit('Covariance matrix not found.')
 
-        #self.icov = np.linalg.inv(self.cov)
+        self.icov = np.linalg.inv(self.cov)
 
         # read real-space monopole
         data = np.genfromtxt(self.xi_r_file)

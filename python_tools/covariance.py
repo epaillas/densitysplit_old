@@ -3,30 +3,10 @@ import sys
 import glob
 import click
 from scipy.integrate import quad, simps
-from scipy.interpolate import RectBivariateSpline, InterpolatedUnivariateSpline, interp1d
+from scipy.interpolate import InterpolatedUnivariateSpline
 
-def readCorrFileList(self, fnames):
-        xi_smu_list = []
-        for fname in fnames:
-            data = np.genfromtxt(fname)
-            data[np.isnan(data)] = -1 # Set invalid values to -1
-            data[data == np.inf] = -1 # Set invalid values to -1 
-            s = np.unique(data[:,0])
-            mu = np.unique(data[:,3])
 
-            xi_smu = np.zeros([len(s), len(mu)])
-            counter = 0
-            for i in range(len(s)):
-                for j in range(len(mu)):
-                    xi_smu[i, j] = data[counter, -1]
-                    counter += 1
-
-            xi_smu_list.append(xi_smu)
-
-        xi_smu_list = np.asarray(xi_smu_list)
-        return s, mu, xi_smu_list
-
-def readCorrFile(self, fname):
+def readCorrFile(fname):
     data = np.genfromtxt(fname)
     s = np.unique(data[:,0])
     mu = np.unique(data[:,3])
@@ -35,44 +15,31 @@ def readCorrFile(self, fname):
     counter = 0
     for i in range(len(s)):
         for j in range(len(mu)):
-            xi_smu[i, j] = data[counter, -1]
+            xi_smu[j, i] = data[counter, -1]
             counter += 1
 
     return s, mu, xi_smu
 
-def getMonopole(self, s, mu, xi_smu_list):
-    monopole = []
-    for xi_smu in xi_smu_list:
-        s, xi0 = self._getMonopole(s, mu, xi_smu)
-        monopole.append(xi0)
-    monopole = np.asarray(monopole)
-    return s, monopole
+def getMonopole(s, mu, xi_smu):
+        monopole = np.zeros(xi_smu.shape[0])
+        for i in range(xi_smu.shape[0]):
+            mufunc = InterpolatedUnivariateSpline(mu, xi_smu[i, :], k=3)
+            xaxis = np.linspace(-1, 1, 1000)
+            yaxis = mufunc(xaxis) / 2
+            monopole[i] = simps(yaxis, xaxis)
+        return s, monopole
 
-def getQuadrupole(self, s, mu, xi_smu_list):
-    quadrupole = []
-    for xi_smu in xi_smu_list:
-        r, xi2 = self._getQuadrupole(s, mu, xi_smu)
-        quadrupole.append(xi2)
-    quadrupole = np.asarray(quadrupole)
-    return r, quadrupole
+def getQuadrupole(s, mu, xi_smu):
+    quadrupole = np.zeros(xi_smu.shape[0])
+    for i in range(xi_smu.shape[0]):
+        mufunc = InterpolatedUnivariateSpline(mu, xi_smu[i, :], k=3)
+        xaxis = np.linspace(-1, 1, 1000)
+        yaxis = mufunc(xaxis) * 5 / 2 * (3 * xaxis**2 - 1) / 2
+        quadrupole[i] = simps(yaxis, xaxis)
 
-def _getMonopole(self, s, mu, xi_smu):
-    mono = np.zeros(xi_smu.shape[0])
-    for j in range(xi_smu.shape[0]):
-        mufunc = InterpolatedUnivariateSpline(mu, xi_smu[j, :], k=3)
-        mono[j] = quad(lambda x: mufunc(x) / 2, -1, 1, full_output=1)[0]
+    return s, quadrupole
 
-    return s, mono
-
-def _getQuadrupole(self, s, mu, xi_smu):
-    quadr = np.zeros(xi_smu.shape[0])
-    for j in range(xi_smu.shape[0]):
-        mufunc = InterpolatedUnivariateSpline(mu, xi_smu[j, :], k=3)
-        quadr[j] = quad(lambda x: mufunc(x) * 5 / 2 * (3. * x ** 2 - 1) / 2., -1, 1, full_output=1)[0]
-
-    return s, quadr
-
-def getCovarianceMatrix(self, data, norm=False):
+def getCovarianceMatrix(data, norm=False):
     """
     Assumes rows are observations,
     columns are variables
@@ -97,7 +64,7 @@ def getCovarianceMatrix(self, data, norm=False):
     else:
         return cov
 
-def getCrossCovarianceMatrix(self, data1, data2, norm=False):
+def getCrossCovarianceMatrix(data1, data2, norm=False):
     """
     Assumes rows are observations,
     columns are variables
@@ -123,33 +90,41 @@ def getCrossCovarianceMatrix(self, data1, data2, norm=False):
     else:
         return cov
 
-def MultipoleCovariance(handle_mocks, handle_cov):
+def MultipoleCovariance(handle_mocks, smin, smax):
         files_mocks = sorted(glob.glob(handle_mocks))
         mock_datavec = []
         for fname in files_mocks:
             s, mu, xi_smu_mock = readCorrFile(fname)
-            s, xi0 = _getMonopole(s, mu, xi_smu_mock)
-            s, xi2 = _getQuadrupole(s, mu, xi_smu_mock)
+            s, xi0 = getMonopole(s, mu, xi_smu_mock)
+            s, xi2 = getQuadrupole(s, mu, xi_smu_mock)
+
+            # only keep scales to fit later
+            idx = (s >= smin) & (s <= smax)
+            s = s[idx]
+            xi0 = xi0[idx]
+            xi2 = xi2[idx]
 
             datavec = np.concatenate(xi0, xi2)
-
             mock_datavec.append(datavec)
 
         mock_datavec = np.asarray(mock_datavec)
-
         cov = getCovarianceMatrix(mock_datavec)
-
         return cov
 
 @click.command()
+@click.option('--handle_in', type=str, required=True, help='Handle from mocks')
+@click.option('--handle_out', type=str, required=True, help='Handle for the mean')
+@click.option('--smin', type=float, default=0.0, help='Minimum scale to fit (in Mpc/h)')
+@click.option('--smax', type=float, default=100.0, help='Maximum scale to fit (in Mpc/h)')
 
-@click.option('--handle_in', type=str, required=True)
-@click.option('--handle_out', type=str, required=True)
+def get_covariance(handle_in,
+                   handle_out,
+                   smin,
+                   smax):
 
-def get_covariance(handle_in
-                   handle_out)
-
-    cov = MultipoleCovariance(handle_mocks=handle_mocks)
+    cov = MultipoleCovariance(handle_mocks=handle_in,
+                              smin=smin,
+                              smax=smax)
 
     np.save(handle_out, cov)
 
