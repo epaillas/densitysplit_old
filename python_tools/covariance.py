@@ -104,7 +104,7 @@ def MultipoleCovariance(handle_mocks, smin, smax, full_fit=True):
             xi0 = xi0[idx]
             xi2 = xi2[idx]
 
-            if full_fit
+            if full_fit:
                 datavec = np.concatenate((xi0, xi2))
             else:
                 datavec = xi2
