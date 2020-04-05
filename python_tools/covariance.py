@@ -90,7 +90,7 @@ def getCrossCovarianceMatrix(data1, data2, norm=False):
     else:
         return cov
 
-def MultipoleCovariance(handle_mocks, smin, smax):
+def MultipoleCovariance(handle_mocks, smin, smax, full_fit=True):
         files_mocks = sorted(glob.glob(handle_mocks))
         mock_datavec = []
         for fname in files_mocks:
@@ -104,7 +104,11 @@ def MultipoleCovariance(handle_mocks, smin, smax):
             xi0 = xi0[idx]
             xi2 = xi2[idx]
 
-            datavec = np.concatenate((xi0, xi2))
+            if full_fit
+                datavec = np.concatenate((xi0, xi2))
+            else:
+                datavec = xi2
+
             mock_datavec.append(datavec)
 
         mock_datavec = np.asarray(mock_datavec)
@@ -116,15 +120,18 @@ def MultipoleCovariance(handle_mocks, smin, smax):
 @click.option('--handle_out', type=str, required=True, help='Handle for the mean')
 @click.option('--smin', type=float, default=0.0, help='Minimum scale to fit (in Mpc/h)')
 @click.option('--smax', type=float, default=100.0, help='Maximum scale to fit (in Mpc/h)')
+@click.option('--full_fit', type=bool, default=True, help='Full fit or quadrupole only?')
 
 def get_covariance(handle_in,
                    handle_out,
                    smin,
-                   smax):
+                   smax,
+                   full_fit):
 
     cov = MultipoleCovariance(handle_mocks=handle_in,
                               smin=smin,
-                              smax=smax)
+                              smax=smax,
+                              full_fit=full_fit)
 
     np.save(handle_out, cov)
 
