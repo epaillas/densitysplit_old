@@ -21,6 +21,7 @@ parser.add_argument('--xi_r', type=str)
 parser.add_argument('--delta_r', type=str)
 parser.add_argument('--sv_r', type=str)
 parser.add_argument('--covmat', type=str)
+parser.add_argument('--full_fit', type=int)
 
 args = parser.parse_args()  
 
@@ -28,9 +29,13 @@ os.environ["OMP_NUM_THREADS"] = "1"
 
 
 model = RSDModel(delta_r_file=args.delta_r, xi_r_file=args.xi_r, sv_file=args.sv_r,
-                    xi_smu_file=args.xi_smu, covmat_file=args.covmat)
+                    xi_smu_file=args.xi_smu, covmat_file=args.covmat,
+                    full_fit=args.full_fit)
 
-backend_name = args.xi_smu + '_RSD_emceeChain.h5'
+if args.full_fit == 1:
+    backend_name = args.xi_smu + '_RSD_FullFit.h5'
+else:
+    backend_name = args.xi_smu + '_RSD_QuadFit.h5'
 ndim = 3
 nwalkers = 32
 niter = 5000

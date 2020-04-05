@@ -25,7 +25,7 @@ class RSDModel:
     '''
 
     def __init__(self, delta_r_file, xi_r_file, sv_file, xi_smu_file,
-                 covmat_file):
+                 covmat_file, full_fit=1):
 
         self.delta_r_file = delta_r_file
         self.xi_r_file = xi_r_file
@@ -33,7 +33,8 @@ class RSDModel:
         self.xi_smu_file = xi_smu_file
         self.covmat_file = covmat_file
 
-        self.full_fit = True
+        # full fit (monopole + quadrupole)
+        self.full_fit = bool(full_fit)
 
         print("Setting up redshift-space distortions model.")
 
