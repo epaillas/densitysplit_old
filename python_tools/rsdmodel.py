@@ -33,7 +33,7 @@ class RSDModel:
         self.xi_smu_file = xi_smu_file
         self.covmat_file = covmat_file
 
-        self.full_fit = False
+        self.full_fit = True
 
         print("Setting up redshift-space distortions model.")
 
