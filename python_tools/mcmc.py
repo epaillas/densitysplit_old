@@ -22,6 +22,8 @@ parser.add_argument('--delta_r', type=str)
 parser.add_argument('--sv_r', type=str)
 parser.add_argument('--covmat', type=str)
 parser.add_argument('--full_fit', type=int)
+parser.add_argument('--smin', type=float)
+parser.add_argument('--smax', type=float)
 
 args = parser.parse_args()  
 
@@ -30,7 +32,7 @@ os.environ["OMP_NUM_THREADS"] = "1"
 
 model = RSDModel(delta_r_file=args.delta_r, xi_r_file=args.xi_r, sv_file=args.sv_r,
                     xi_smu_file=args.xi_smu, covmat_file=args.covmat,
-                    full_fit=args.full_fit)
+                    full_fit=args.full_fit, smin=args.smin, smax=args.smax)
 
 if args.full_fit == 1:
     backend_name = args.xi_smu + '_RSD_FullFit.h5'
