@@ -314,7 +314,7 @@ class Model2:
         
 
     def log_likelihood(self, theta):
-        fs8, sigma_v, epsilon = theta
+        fs8, epsilon = theta
         alpha = 1.0
         alpha_para = alpha * epsilon ** (-2/3)
         alpha_perp = epsilon * alpha_para
@@ -332,8 +332,7 @@ class Model2:
         return loglike
 
     def log_prior(self, theta):
-        fs8, sigma_v, epsilon = theta
-
+        fs8, epsilon = theta
 
         if 0.1 < fs8 < 2.0 and 0.8 < epsilon < 1.2:
             return 0.0
