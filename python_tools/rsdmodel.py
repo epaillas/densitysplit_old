@@ -22,8 +22,8 @@ class NadathurAndPercival:
         self.sv_file = sv_file
         self.xi_smu_file = xi_smu_file
         self.covmat_file = covmat_file
-        self.smin = 0
-        self.smax = 100
+        self.smin = smin
+        self.smax = smax
 
         # full fit (monopole + quadrupole)
         self.full_fit = bool(full_fit)
