@@ -35,9 +35,9 @@ model = NadathurAndPercival(delta_r_file=args.delta_r, xi_r_file=args.xi_r, sv_f
                  full_fit=args.full_fit, smin=args.smin, smax=args.smax)
 
 if args.full_fit == 1:
-    backend_name = args.xi_smu + '_RSD_FullFit_{}-{}.h5'.format(smin, smax)
+    backend_name = args.xi_smu + '_RSD_FullFit_{}-{}.h5'.format(args.smin, args.smax)
 else:
-    backend_name = args.xi_smu + '_RSD_QuadFit_{}-{}.h5'.format(smin, smax)
+    backend_name = args.xi_smu + '_RSD_QuadFit_{}-{}.h5'.format(args.smin, args.smax)
 ndim = 3
 nwalkers = 32
 niter = 5000
