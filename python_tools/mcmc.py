@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from rsdmodel import RSDModel
+from rsdmodel import NadathurAndPercival
 import os
 import sys
 import argparse
@@ -30,7 +30,7 @@ args = parser.parse_args()
 os.environ["OMP_NUM_THREADS"] = "1"
 
 
-model = RSDModel(delta_r_file=args.delta_r, xi_r_file=args.xi_r, sv_file=args.sv_r,
+model = NadathurAndPercival(delta_r_file=args.delta_r, xi_r_file=args.xi_r, sv_file=args.sv_r,
                  xi_smu_file=args.xi_smu, covmat_file=args.covmat,
                  full_fit=args.full_fit, smin=args.smin, smax=args.smax)
 
