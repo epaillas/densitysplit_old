@@ -84,11 +84,6 @@ class NadathurAndPercival:
         s, self.xi0_s = self._getMonopole(self.s_for_xi, self.mu_for_xi, xi_smu_obs)
         s, self.xi2_s = self._getQuadrupole(self.s_for_xi, self.mu_for_xi, xi_smu_obs)
 
-        if self.full_fit:
-            self.datavec = np.concatenate((self.xi0_s, self.xi2_s))
-        else:
-            self.datavec = self.xi2_s
-
         # restrict measured vectors to the desired fitting scales
         idx = (s >= self.smin) & (s <= self.smax)
 
@@ -98,6 +93,11 @@ class NadathurAndPercival:
         self.r_for_sv = self.r_for_sv[idx]
         self.xi0_s = self.xi0_s[idx]
         self.xi2_s = self.xi2_s[idx]
+
+        if self.full_fit:
+            self.datavec = np.concatenate((self.xi0_s, self.xi2_s))
+        else:
+            self.datavec = self.xi2_s
         
 
     def log_likelihood(self, theta):
@@ -352,8 +352,6 @@ class NumericalSolution:
         else:
             modelvec = xi2
 
-        print(np.shape(self.datavec))
-        print(np.shape(modelvec))
 
         chi2 = np.dot(np.dot((modelvec - self.datavec), self.icov), modelvec - self.datavec)
         loglike = -self.nmocks/2 * np.log(1 + chi2/(self.nmocks-1))
