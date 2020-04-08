@@ -31,13 +31,13 @@ os.environ["OMP_NUM_THREADS"] = "1"
 
 
 model = RSDModel(delta_r_file=args.delta_r, xi_r_file=args.xi_r, sv_file=args.sv_r,
-                    xi_smu_file=args.xi_smu, covmat_file=args.covmat,
-                    full_fit=args.full_fit, smin=args.smin, smax=args.smax)
+                 xi_smu_file=args.xi_smu, covmat_file=args.covmat,
+                 full_fit=args.full_fit, smin=args.smin, smax=args.smax)
 
 if args.full_fit == 1:
-    backend_name = args.xi_smu + '_RSD_FullFit.h5'
+    backend_name = args.xi_smu + '_RSD_FullFit_{}-{}.h5'.format(smin, smax)
 else:
-    backend_name = args.xi_smu + '_RSD_QuadFit.h5'
+    backend_name = args.xi_smu + '_RSD_QuadFit_{}-{}.h5'.format(smin, smax)
 ndim = 3
 nwalkers = 32
 niter = 5000
