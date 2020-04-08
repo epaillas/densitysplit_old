@@ -318,11 +318,6 @@ class NumericalSolution:
         s, self.xi0_s = self._getMonopole(self.s_for_xi, self.mu_for_xi, xi_smu_obs)
         s, self.xi2_s = self._getQuadrupole(self.s_for_xi, self.mu_for_xi, xi_smu_obs)
 
-        if self.full_fit:
-            self.datavec = np.concatenate((self.xi0_s, self.xi2_s))
-        else:
-            self.datavec = self.xi2_s
-
         # restrict measured vectors to the desired fitting scales
         idx = (s >= self.smin) & (s <= self.smax)
 
@@ -333,6 +328,11 @@ class NumericalSolution:
         self.r_for_vr = self.r_for_vr[idx]
         self.xi0_s = self.xi0_s[idx]
         self.xi2_s = self.xi2_s[idx]
+
+        if self.full_fit:
+            self.datavec = np.concatenate((self.xi0_s, self.xi2_s))
+        else:
+            self.datavec = self.xi2_s
 
 
     
@@ -345,6 +345,7 @@ class NumericalSolution:
         xi0, xi2 = self.theory_multipoles(fs8, sigma_v,
                                           alpha_perp, alpha_para,
                                           self.s_for_xi, self.mu_for_xi)
+
 
         if self.full_fit:
             modelvec = np.concatenate((xi0, xi2))
