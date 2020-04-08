@@ -352,6 +352,9 @@ class NumericalSolution:
         else:
             modelvec = xi2
 
+        print(np.shape(self.datavec))
+        print(np.shape(modelvec))
+
         chi2 = np.dot(np.dot((modelvec - self.datavec), self.icov), modelvec - self.datavec)
         loglike = -self.nmocks/2 * np.log(1 + chi2/(self.nmocks-1))
         return loglike
