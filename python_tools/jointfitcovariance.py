@@ -138,8 +138,8 @@ def MultipoleCovariance(handle_mocks, smins, smaxs, full_fit=True):
 @click.command()
 @click.option('--handle_in', type=str, required=True, help='Handle from mocks')
 @click.option('--handle_out', type=str, required=True, help='Handle for the mean')
-@click.option('--smins', type=float, default=0.0, help='Minimum scale to fit (in Mpc/h)')
-@click.option('--smaxs', type=float, default=100.0, help='Maximum scale to fit (in Mpc/h)')
+@click.option('--smins', type=str, default=0.0, help='Minimum scale to fit (in Mpc/h)')
+@click.option('--smaxs', type=str, default=100.0, help='Maximum scale to fit (in Mpc/h)')
 @click.option('--full_fit', type=bool, default=True, help='Full fit or quadrupole only?')
 
 def get_covariance(handle_in,
