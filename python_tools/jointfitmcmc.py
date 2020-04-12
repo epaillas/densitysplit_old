@@ -35,9 +35,9 @@ if args.model == 1:
                     full_fit=args.full_fit, smins=args.smin, smaxs=args.smax)
 
     if args.full_fit == 1:
-        backend_name = args.xi_smu + '_Model1_Joint_FullFit_{}-{}.h5'.format(args.smin, args.smax)
+        backend_name = 'Model1_Joint_FullFit_{}-{}.h5'.format(args.smin, args.smax)
     else:
-        backend_name = args.xi_smu + '_Model1_Joint_QuadFit_{}-{}.h5'.format(args.smin, args.smax)
+        backend_name = 'Model1_Joint_QuadFit_{}-{}.h5'.format(args.smin, args.smax)
     ndim = 3
     nwalkers = 32
     niter = 5000
