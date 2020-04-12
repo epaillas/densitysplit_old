@@ -132,17 +132,21 @@ class Model1:
         
 
     def log_likelihood(self, theta):
-        fs8, sigma_v, epsilon = theta
+        fs8, sigma_v1, sigma_v2, epsilon = theta
         alpha = 1.0
         alpha_para = alpha * epsilon ** (-2/3)
         alpha_perp = epsilon * alpha_para
+
+        sigmalist = [sigma_v1, sigma_v2]
+        sigma_v = {}
 
         modelvec = np.array([])
 
         for j in range(self.ndenbins):
             denbin = 'den{}'.format(j)
+            sigma_v[denbin] = sigmalist[j]
 
-            xi0, xi2 = self.theory_multipoles(fs8, sigma_v,
+            xi0, xi2 = self.theory_multipoles(fs8, sigma_v[denbin],
                                             alpha_perp, alpha_para,
                                             self.s_for_xi[denbin], self.mu_for_xi[denbin], denbin)
 
@@ -156,10 +160,13 @@ class Model1:
         return loglike
 
     def log_prior(self, theta):
-        fs8, sigma_v, epsilon = theta
+        fs8, sigma_v1, sigma_v2, epsilon = theta
 
 
-        if 0.1 < fs8 < 2.0 and 50 < sigma_v < 500 and 0.8 < epsilon < 1.2:
+        if 0.1 < fs8 < 2.0 \
+        and 0 < sigma_v1 < 500 \
+        and 0 < sigma_v2 < 500 \
+        and 0.8 < epsilon < 1.2:
             return 0.0
         
         return -np.inf

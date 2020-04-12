@@ -38,16 +38,17 @@ if args.model == 1:
         backend_name = 'Model1_Joint_FullFit_{}-{}.h5'.format(args.smin, args.smax)
     else:
         backend_name = 'Model1_Joint_QuadFit_{}-{}.h5'.format(args.smin, args.smax)
-    ndim = 3
+    ndim = 4
     nwalkers = 32
     niter = 5000
 
     fs8 = 0.472
-    sigma_v = 300
+    sigma_v1 = 300
+    sigma_v2 = 300
     epsilon = 1.0
 
-    start_params = np.array([fs8, sigma_v, epsilon])
-    scales = [1, 1000, 1]
+    start_params = np.array([fs8, sigma_v1, sigma_v2, epsilon])
+    scales = [1, 1000, 1000, 1]
 
     p0 = [start_params + 1e-2 * np.random.randn(ndim) * scales for i in range(nwalkers)]
 
