@@ -209,11 +209,15 @@ class Model1:
                 true_s = np.sqrt(true_spar ** 2. + true_sperp ** 2.)
                 true_mu[j] = true_spar / true_s
 
-                rpar = true_spar + true_s * scaled_fs8 * rescaled_Delta_r(true_s) * true_mu[j] / 3.
+                r = true_s * (1 + scaled_fs8/3 * rescaled_Delta_r(true_s) * true_mu[j]**2)
+                rpar = r * true_mu[j]
+                #rpar = true_spar + true_s * scaled_fs8 * rescaled_Delta_r(true_s) * true_mu[j] / 3.
                 sy_central = sigma_v * rescaled_sv(np.sqrt(true_sperp**2 + rpar**2)) * self.iaH
                 y = np.linspace(-3 * sy_central, 3 * sy_central, 100)
 
-                rpar = true_spar + true_s * scaled_fs8 * rescaled_Delta_r(true_s) * true_mu[j] / 3. - y
+                r = true_s * (1 + scaled_fs8/3 * rescaled_Delta_r(true_s) * true_mu[j]**2)
+                rpar = r * true_mu[j] - y
+                #rpar = true_spar + true_s * scaled_fs8 * rescaled_Delta_r(true_s) * true_mu[j] / 3. - y
                 rr = np.sqrt(true_sperp ** 2 + rpar ** 2)
                 sy = sigma_v * rescaled_sv(rr) * self.iaH
 
