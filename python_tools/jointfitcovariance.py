@@ -132,7 +132,7 @@ def MultipoleCovariance(handle_mocks, smins, smaxs, full_fit=True):
 
 
         mock_datavec = np.asarray(mock_datavec)
-        cov = getCovarianceMatrix(mock_datavec)o
+        cov = getCovarianceMatrix(mock_datavec)
         return cov
 
 @click.command()
