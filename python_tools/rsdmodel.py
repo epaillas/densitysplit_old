@@ -33,7 +33,7 @@ class Model1:
         self.om_m = 0.285
         self.s8 = 0.828
         self.cosmo = Cosmology(om_m=self.om_m, s8=self.s8)
-        self.nmocks = 120
+        self.nmocks = 300
 
         self.eff_z = 0.57
         self.b = 2.05
@@ -165,13 +165,13 @@ class Model1:
                 true_s = np.sqrt(true_spar ** 2. + true_sperp ** 2.)
                 true_mu[j] = true_spar / true_s
 
-                r = true_s * (1 + scaled_fs8/3 * rescaled_Delta_r(true_s) * true_mu[j]**2)
+                r = true_s * (1 + scaled_fs8/3 * rescaled_Delta_r(true_s) * true_mu[j])
                 rpar = r * true_mu[j]
                 #rpar = true_spar + true_s * scaled_fs8 * rescaled_Delta_r(true_s) * true_mu[j] / 3.
                 sy_central = sigma_v * rescaled_sv(np.sqrt(true_sperp**2 + rpar**2)) * self.iaH
                 y = np.linspace(-3 * sy_central, 3 * sy_central, 100)
 
-                r = true_s * (1 + scaled_fs8/3 * rescaled_Delta_r(true_s) * true_mu[j]**2)
+                r = true_s * (1 + scaled_fs8/3 * rescaled_Delta_r(true_s) * true_mu[j])
                 rpar = r * true_mu[j] - y
                 #rpar = true_spar + true_s* scaled_fs8 * rescaled_Delta_r(true_s) * true_mu[j] / 3. - y
                 rr = np.sqrt(true_sperp ** 2 + rpar ** 2)
@@ -378,7 +378,7 @@ class Model2:
                 true_s = np.sqrt(true_spar ** 2. + true_sperp ** 2.)
                 true_mu[j] = true_spar / true_s
 
-                r = true_s * (1 + scaled_fs8/3 * rescaled_Delta_r(true_s) * true_mu[j]**2)
+                r = true_s * (1 + scaled_fs8/3 * rescaled_Delta_r(true_s) * true_mu[j]**1)
 
                 xi_model[j] = rescaled_xi_r(r) + scaled_fs8/3 * rescaled_Delta_r(r) *\
                               (1 + rescaled_xi_r(r)) + scaled_fs8 * true_mu[j]**2 *\

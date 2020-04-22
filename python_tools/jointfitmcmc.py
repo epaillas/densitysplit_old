@@ -71,3 +71,43 @@ if args.model == 1:
         sampler.run_mcmc(p0, niter, progress=True)
 
 
+if args.model == 2:
+    model = Model1(delta_r_files=args.delta_r, xi_r_files=args.xi_r,
+                    xi_smu_files=args.xi_smu, covmat_file=args.covmat,
+                    full_fit=args.full_fit, smins=args.smin, smaxs=args.smax)
+
+    if args.full_fit == 1:
+        backend_name = 'Model2_Joint_FullFit_{}-{}.h5'.format(args.smin, args.smax)
+    else:
+        backend_name = 'Model2_Joint_QuadFit_{}-{}.h5'.format(args.smin, args.smax)
+    ndim = 2
+    nwalkers = 32
+    niter = 5000
+
+    fs8 = 0.472
+    epsilon = 1.0
+
+    start_params = np.array([fs8, epsilon])
+    scales = [1, 1]
+
+    p0 = [start_params + 1e-2 * np.random.randn(ndim) * scales for i in range(nwalkers)]
+
+    print('Running emcee with the following parameters:')
+    print('nwalkers: ' + str(nwalkers))
+    print('ndim: ' + str(ndim))
+    print('niter: ' + str(niter))
+    print('backend: ' + backend_name)
+    print('Running in {} CPUs'.format(args.ncores))
+
+    backend = emcee.backends.HDFBackend(backend_name)
+    backend.reset(nwalkers, ndim)
+
+    with Pool(processes=args.ncores) as pool:
+
+        sampler = emcee.EnsembleSampler(nwalkers, ndim,
+                                        log_probability,
+                                        backend=backend,
+                                        pool=pool)
+        sampler.run_mcmc(p0, niter, progress=True)
+
+
