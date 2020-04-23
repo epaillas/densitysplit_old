@@ -1,5 +1,5 @@
 import numpy as np
-from jointfit import Model1
+from jointfit import Model1, Model2
 import os
 import sys
 import argparse
@@ -72,7 +72,7 @@ if args.model == 1:
 
 
 if args.model == 2:
-    model = Model1(delta_r_files=args.delta_r, xi_r_files=args.xi_r,
+    model = Model2(delta_r_files=args.delta_r, xi_r_files=args.xi_r,
                     xi_smu_files=args.xi_smu, covmat_file=args.covmat,
                     full_fit=args.full_fit, smins=args.smin, smaxs=args.smax)
 
