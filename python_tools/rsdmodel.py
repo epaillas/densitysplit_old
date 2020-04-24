@@ -378,7 +378,7 @@ class Model2:
                 true_s = np.sqrt(true_spar ** 2. + true_sperp ** 2.)
                 true_mu[j] = true_spar / true_s
 
-                r = true_s * (1 + scaled_fs8/3 * rescaled_Delta_r(true_s) * true_mu[j]**1)
+                r = true_s * (1 + scaled_fs8/3 * rescaled_Delta_r(true_s) * true_mu[j]**2)
 
                 xi_model[j] = rescaled_xi_r(r) + scaled_fs8/3 * rescaled_Delta_r(r) *\
                               (1 + rescaled_xi_r(r)) + scaled_fs8 * true_mu[j]**2 *\
@@ -615,7 +615,7 @@ class Model3:
                     rperp = true_sperp
                     r = np.sqrt(rpar**2 + rperp**2)
                     mu = rpar / r
-                    res = rpar - true_spar + rescaled_vr(r)*mu * self.iaH
+                    res = rpar - true_spar + rescaled_vr(r)*mu**2 * self.iaH
                     return res
 
                 rpar = fsolve(func=residual, x0=true_spar)[0]

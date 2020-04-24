@@ -25,6 +25,7 @@ parser.add_argument('--full_fit', type=int)
 parser.add_argument('--smin', type=float)
 parser.add_argument('--smax', type=float)
 parser.add_argument('--model', type=int)
+parser.add_argument('--backend_name', type=str)
 
 args = parser.parse_args()  
 
@@ -35,10 +36,6 @@ if args.model == 1:
                     xi_smu_file=args.xi_smu, covmat_file=args.covmat,
                     full_fit=args.full_fit, smin=args.smin, smax=args.smax)
 
-    if args.full_fit == 1:
-        backend_name = args.xi_smu + '_Model1_FullFit_{}-{}.h5'.format(args.smin, args.smax)
-    else:
-        backend_name = args.xi_smu + '_Model1_QuadFit_{}-{}.h5'.format(args.smin, args.smax)
     ndim = 3
     nwalkers = 32
     niter = 5000
@@ -56,10 +53,10 @@ if args.model == 1:
     print('nwalkers: ' + str(nwalkers))
     print('ndim: ' + str(ndim))
     print('niter: ' + str(niter))
-    print('backend: ' + backend_name)
+    print('backend: ' + args.backend_name)
     print('Running in {} CPUs'.format(args.ncores))
 
-    backend = emcee.backends.HDFBackend(backend_name)
+    backend = emcee.backends.HDFBackend(args.backend_name)
     backend.reset(nwalkers, ndim)
 
     with Pool(processes=args.ncores) as pool:
@@ -76,10 +73,6 @@ if args.model == 2:
                     xi_smu_file=args.xi_smu, covmat_file=args.covmat,
                     full_fit=args.full_fit, smin=args.smin, smax=args.smax)
 
-    if args.full_fit == 1:
-        backend_name = args.xi_smu + '_Model2_FullFit_{}-{}.h5'.format(args.smin, args.smax)
-    else:
-        backend_name = args.xi_smu + '_Model2_QuadFit_{}-{}.h5'.format(args.smin, args.smax)
     ndim = 2
     nwalkers = 32
     niter = 5000
@@ -96,10 +89,10 @@ if args.model == 2:
     print('nwalkers: ' + str(nwalkers))
     print('ndim: ' + str(ndim))
     print('niter: ' + str(niter))
-    print('backend: ' + backend_name)
+    print('backend: ' + args.backend_name)
     print('Running in {} CPUs'.format(args.ncores))
 
-    backend = emcee.backends.HDFBackend(backend_name)
+    backend = emcee.backends.HDFBackend(args.backend_name)
     backend.reset(nwalkers, ndim)
 
     with Pool(processes=args.ncores) as pool:
