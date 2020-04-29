@@ -60,7 +60,8 @@ class DensitySplitter:
             nrows = fin.read_ints()[0]
             ncols = fin.read_ints()[0]
             pos = fin.read_reals().reshape(nrows, ncols)
-            cout = np.random.choice(pos, size=self.nrandoms, replace=False)
+            idx = np.random.choice(nrows, size=self.nrandoms, replace=False)
+            cout = pos[idx]
 
         else:
             print('Randoms will be generated from a uniform distribution.')
