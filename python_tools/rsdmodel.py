@@ -45,13 +45,13 @@ class Model1:
         eofz = np.sqrt((self.om_m * (1 + self.eff_z) ** 3 + 1 - self.om_m))
         self.iaH = (1 + self.eff_z) / (100. * eofz) 
 
-        # read covariance matrix
-        if os.path.isfile(self.covmat_file):
-            print('Reading covariance matrix: ' + self.covmat_file)
-            self.cov = np.load(self.covmat_file)
-            self.icov = np.linalg.inv(self.cov)
-        else:
-            sys.exit('Covariance matrix not found.')
+        # # read covariance matrix
+        # if os.path.isfile(self.covmat_file):
+        #     print('Reading covariance matrix: ' + self.covmat_file)
+        #     self.cov = np.load(self.covmat_file)
+        #     self.icov = np.linalg.inv(self.cov)
+        # else:
+        #     sys.exit('Covariance matrix not found.')
 
 
         # read real-space monopole
@@ -165,15 +165,11 @@ class Model1:
                 true_s = np.sqrt(true_spar ** 2. + true_sperp ** 2.)
                 true_mu[j] = true_spar / true_s
 
-                r = true_s * (1 + scaled_fs8/3 * rescaled_Delta_r(true_s) * true_mu[j])
-                rpar = r * true_mu[j]
-                #rpar = true_spar + true_s * scaled_fs8 * rescaled_Delta_r(true_s) * true_mu[j] / 3.
+                rpar = true_spar + true_s * scaled_fs8 * rescaled_Delta_r(true_s) * true_mu[j] / 3.
                 sy_central = sigma_v * rescaled_sv(np.sqrt(true_sperp**2 + rpar**2)) * self.iaH
                 y = np.linspace(-3 * sy_central, 3 * sy_central, 100)
 
-                r = true_s * (1 + scaled_fs8/3 * rescaled_Delta_r(true_s) * true_mu[j])
-                rpar = r * true_mu[j] - y
-                #rpar = true_spar + true_s* scaled_fs8 * rescaled_Delta_r(true_s) * true_mu[j] / 3. - y
+                rpar = true_spar + true_s* scaled_fs8 * rescaled_Delta_r(true_s) * true_mu[j] / 3. - y
                 rr = np.sqrt(true_sperp ** 2 + rpar ** 2)
                 sy = sigma_v * rescaled_sv(rr) * self.iaH
 

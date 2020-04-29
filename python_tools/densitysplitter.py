@@ -10,7 +10,7 @@ class DensitySplitter:
 
     def __init__(self, handle, tracer_file, centres_file, nrandoms, box_size,
                  dmin, dmax, nrbins, is_box=True, ngrid=100, is_matter=False,
-                 get_monopole=True, get_rmu=False):
+                 get_monopole=True, get_rmu=False, randoms_from_gal=False):
 
         # file names
         self.handle = handle
@@ -46,18 +46,25 @@ class DensitySplitter:
             self.CCF_rmu()
 
 
-    def GenerateRandomPoints(self):
+    def GenerateRandomPoints(self, randoms_from_gal=False):
         '''
         Generates random points on a box
         of length and writes them down
         to an unformatted Fortran 90 file.
         '''
 
-        x = np.random.uniform(0, self.box_size, self.nrandoms)
-        y = np.random.uniform(0, self.box_size, self.nrandoms)
-        z = np.random.uniform(0, self.box_size, self.nrandoms)
+        if randoms_from_gal:
+            fin = FortranFile(self.tracer_file, 'r')
+            nrows = fin.read_ints()[0]
+            ncols = fin.read_ints()[0]
+            pos = fin.read_reals().reshape(nrows, ncols)
+            cout = np.random.choice(pos, size=self.nrandoms, replace=False)
 
-        cout = np.c_[x, y, z]
+        else:
+            x = np.random.uniform(0, self.box_size, self.nrandoms)
+            y = np.random.uniform(0, self.box_size, self.nrandoms)
+            z = np.random.uniform(0, self.box_size, self.nrandoms)
+            cout = np.c_[x, y, z]
 
         f = FortranFile(self.centres_file, 'w')
         nrows, ncols = np.shape(cout)
