@@ -115,10 +115,10 @@ def split_densities(gal_den_monopole,
 
 
     for i in range(1, ndenbins + 1):
-        delta_r_file = handle + '_den{}'.format(i) + '.CCF_dm_den_monopole'
-        xi_r_file = handle + '_den{}'.format(i) + '.CCF_gal_den_monopole'
+        delta_r_file = handle + '_den{}'.format(i) + '.CCF_DM_monopole'
+        xi_r_file = handle + '_den{}'.format(i) + '.CCF_gal_monopole'
         gal_vr_file = handle + '_den{}'.format(i) + '.CCF_gal_vr'
-        gal_sv_los_file = handle + '_den{}'.format(i) + '.CCF_gal_sv_los'
+        gal_sv_los_file = handle + '_den{}'.format(i) + '.CCF_gal_svlos'
 
         fmt = 2*'%10.3f '
         
