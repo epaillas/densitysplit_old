@@ -54,6 +54,7 @@ class DensitySplitter:
         '''
 
         if randoms_from_gal:
+            print('Randoms will be generated from galaxy positions.')
             fin = FortranFile(self.tracer_file, 'r')
             nrows = fin.read_ints()[0]
             ncols = fin.read_ints()[0]
@@ -61,6 +62,7 @@ class DensitySplitter:
             cout = np.random.choice(pos, size=self.nrandoms, replace=False)
 
         else:
+            print('Randoms will be generated from a uniform distribution.')
             x = np.random.uniform(0, self.box_size, self.nrandoms)
             y = np.random.uniform(0, self.box_size, self.nrandoms)
             z = np.random.uniform(0, self.box_size, self.nrandoms)
