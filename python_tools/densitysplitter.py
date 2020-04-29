@@ -27,6 +27,7 @@ class DensitySplitter:
         self.dmax = dmax
         self.nrbins = nrbins
         self.ngrid = ngrid
+        self.randoms_from_gal = randoms_from_gal
 
         print('handle: {}'.format(self.handle))
         print('tracer_file: {}'.format(self.tracer_file))
@@ -46,14 +47,14 @@ class DensitySplitter:
             self.CCF_rmu()
 
 
-    def GenerateRandomPoints(self, randoms_from_gal=False):
+    def GenerateRandomPoints(self):
         '''
         Generates random points on a box
         of length and writes them down
         to an unformatted Fortran 90 file.
         '''
 
-        if randoms_from_gal:
+        if self.randoms_from_gal:
             print('Randoms will be generated from galaxy positions.')
             fin = FortranFile(self.tracer_file, 'r')
             nrows = fin.read_ints()[0]
