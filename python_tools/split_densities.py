@@ -10,11 +10,13 @@ import matplotlib.pyplot as plt
 @click.option('--dm_den_monopole', type=str, required=True)
 @click.option('--has_velocity', type=bool, required=True)
 @click.option('--handle', type=str, required=True)
+@click.option('--ndenbins', type=int, required=True)
 
 def split_densities(gal_den_monopole,
                     dm_den_monopole,
                     has_velocity,
-                    handle):
+                    handle,
+                    ndenbins):
 
 
     print('\nSplitting densities for the following arguments:')
@@ -77,8 +79,8 @@ def split_densities(gal_den_monopole,
 
     # divide profiles by their Delta(r=20mpc/h)
     profiles = {}
-    for i in range(1, 6):
-        profiles['den{}'.format(i)] = sorted_profiles[int((i-1)*ncentres/5):int(i*ncentres/5)]
+    for i in range(1, ndenbins + 1):
+        profiles['den{}'.format(i)] = sorted_profiles[int((i-1)*ncentres/ndenbins):int(i*ncentres/ndenbins)]
 
     # get average densities
     xi_r = {}
@@ -86,7 +88,7 @@ def split_densities(gal_den_monopole,
     xibar_r = {}
     Delta_r = {}
 
-    for i in range(1, 6):
+    for i in range(1, ndenbins + 1):
         den = profiles['den{}'.format(i)]
         xi_r['den{}'.format(i)] = np.mean(den, axis=0)[:,-6]
         xibar_r['den{}'.format(i)] = np.mean(den, axis=0)[:,-5]
@@ -97,7 +99,7 @@ def split_densities(gal_den_monopole,
     gal_vr = {}
     gal_sv_los = {}
 
-    for i in range(1,6):
+    for i in range(1, ndenbins + 1):
         gal_vr['den{}'.format(i)] = np.zeros(nbins)
         gal_sv_los['den{}'.format(i)] = np.zeros(nbins)
         den = profiles['den{}'.format(i)]
@@ -112,7 +114,7 @@ def split_densities(gal_den_monopole,
         gal_sv_los['den{}'.format(i)] /= sumweights
 
 
-    for i in range(1,6):
+    for i in range(1, ndenbins + 1):
         delta_r_file = handle + '_den{}'.format(i) + '.CCF_dm_den_monopole'
         xi_r_file = handle + '_den{}'.format(i) + '.CCF_gal_den_monopole'
         gal_vr_file = handle + '_den{}'.format(i) + '.CCF_gal_vr'
