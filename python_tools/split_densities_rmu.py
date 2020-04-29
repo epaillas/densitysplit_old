@@ -11,8 +11,12 @@ import click
 @click.option('--gal_den_monopole', type=str, required=True)
 @click.option('--gal_den_rmu', type=str, required=True)
 @click.option('--handle', type=str, required=True)
+@click.option('--ndenbins', type=int, required=True)
 
-def split_densities(gal_den_monopole, gal_den_rmu, handle):
+def split_densities(gal_den_monopole,
+                    gal_den_rmu,
+                    handle,
+                    ndenbins):
 
 
     print('\nSplitting densities for the following arguments:')
@@ -58,13 +62,13 @@ def split_densities(gal_den_monopole, gal_den_rmu, handle):
     
     profiles = {}
     # divide profiles in quantiles
-    for i in range(1, 6):
-        profiles['den{}'.format(i)] = sorted_profiles[int((i-1)*ncentres/5):int(i*ncentres/5)]
+    for i in range(1, ndenbins + 1):
+        profiles['den{}'.format(i)] = sorted_profiles[int((i-1)*ncentres/ndenbins):int(i*ncentres/ndenbins)]
 
     # get mean split profiles
     xi_rmu_mean = {}
 
-    for i in range(1, 6):
+    for i in range(1, ndenbins + 1):
         den = profiles['den{}'.format(i)]
         xi_rmu_mean['den{}'.format(i)] = np.mean(den, axis=0)
 
@@ -79,7 +83,7 @@ def split_densities(gal_den_monopole, gal_den_rmu, handle):
             count += 1
 
 
-    for i in range(1,6):
+    for i in range(1, ndenbins + 1):
         xi_rmu_file = handle + '_den{}'.format(i) + '.CCF_gal_rmu'
         xi_rmu_out = np.c_[bins, xi_rmu_mean['den{}'.format(i)]]
 
