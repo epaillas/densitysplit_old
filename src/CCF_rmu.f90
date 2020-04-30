@@ -266,5 +266,7 @@ program density_profiles
   write(12) delta
   write(12) cum_delta
 
+  print*, 'Im using the correct version'
+
   end program density_profiles
   
