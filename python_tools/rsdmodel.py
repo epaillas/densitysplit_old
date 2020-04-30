@@ -469,14 +469,14 @@ class Model3:
         eofz = np.sqrt((self.om_m * (1 + self.eff_z) ** 3 + 1 - self.om_m))
         self.iaH = (1 + self.eff_z) / (100. * eofz) 
 
-        # build covariance matrix
-        if os.path.isfile(self.covmat_file):
-            print('Reading covariance matrix: ' + self.covmat_file)
-            self.cov = np.load(self.covmat_file)
-        else:
-            sys.exit('Covariance matrix not found.')
+        # # build covariance matrix
+        # if os.path.isfile(self.covmat_file):
+        #     print('Reading covariance matrix: ' + self.covmat_file)
+        #     self.cov = np.load(self.covmat_file)
+        # else:
+        #     sys.exit('Covariance matrix not found.')
 
-        self.icov = np.linalg.inv(self.cov)
+        # self.icov = np.linalg.inv(self.cov)
 
         # read real-space monopole
         data = np.genfromtxt(self.xi_r_file)
