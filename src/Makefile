@@ -6,7 +6,7 @@ MLIBS = -lm
 
 #################
 
-EXES = CCF_monopole.exe CCF_rmu.exe gaussian_filter.f90
+EXES = CCF_monopole.exe CCF_rmu.exe gaussian_filter.exe
 
 all: $(EXES)
 
