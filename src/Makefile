@@ -34,3 +34,4 @@ install: $(EXES)
 
 clean:
 	rm -f $(EXES) *.o *~ *.mod
+?
