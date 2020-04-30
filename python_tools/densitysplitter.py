@@ -59,7 +59,7 @@ class DensitySplitter:
             fin = FortranFile(self.tracer_file, 'r')
             nrows = fin.read_ints()[0]
             ncols = fin.read_ints()[0]
-            pos = fin.read_reals().reshape(nrows, ncols)
+            pos = fin.read_reals(dtype=np.float64).reshape(nrows, ncols)
             idx = np.random.choice(nrows, size=self.nrandoms, replace=False)
             cout = pos[idx]
 
