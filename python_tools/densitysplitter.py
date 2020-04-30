@@ -10,7 +10,8 @@ class DensitySplitter:
 
     def __init__(self, handle, tracer_file, centres_file, nrandoms, box_size,
                  dmin, dmax, nrbins, is_box=True, ngrid=100, is_matter=False,
-                 get_monopole=True, get_rmu=False, randoms_from_gal=False):
+                 get_monopole=True, get_rmu=False, get_filter=True, filter_size=20,
+                 randoms_from_gal=False):
 
         # file names
         self.handle = handle
@@ -19,6 +20,7 @@ class DensitySplitter:
 
         self.get_monopole = get_monopole
         self.get_rmu = get_rmu
+        self.get_filter = get_filter
         self.is_matter = is_matter
         self.is_box = is_box
         self.nrandoms = int(nrandoms)
@@ -27,6 +29,7 @@ class DensitySplitter:
         self.dmax = dmax
         self.nrbins = nrbins
         self.ngrid = ngrid
+        self.filter_size = filter_size
         self.randoms_from_gal = randoms_from_gal
 
         print('handle: {}'.format(self.handle))
@@ -45,6 +48,10 @@ class DensitySplitter:
             self.CCF_monopole()
         if self.get_rmu:
             self.CCF_rmu()
+        if self.get_filter:
+            self.gaussian_filter()
+        
+
 
 
     def GenerateRandomPoints(self):
@@ -102,6 +109,33 @@ class DensitySplitter:
                    str(self.dmin),
                    str(self.dmax),
                    str(self.nrbins),
+                   str(self.ngrid)]
+        
+        log = open(logfile, "w+")
+        subprocess.call(cmd, stdout=log, stderr=log)
+
+    def gaussian_filter(self):
+        '''
+        Computes Gaussian smoothed Delta
+        for a given filter size.
+        '''
+        if self.is_matter:
+            fout = self.handle + '.DM_SmoothedDelta.unf'
+            logfile = self.handle + '.DM_SmoothedDelta.log'
+        else:
+            fout = self.handle + '.gal_SmoothedDelta.unf'
+            logfile = self.handle + '.gal_SmoothedDelta.log'
+
+        if self.is_box:
+            binpath = sys.path[0] + '/bin/'
+            cmd = [binpath + 'gaussian_filter.exe',
+                   self.tracer_file,
+                   self.centres_file,
+                   fout,
+                   str(self.box_size),
+                   str(self.dmin),
+                   str(self.dmax),
+                   str(self.filter_size),
                    str(self.ngrid)]
         
         log = open(logfile, "w+")

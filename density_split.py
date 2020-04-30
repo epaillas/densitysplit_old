@@ -13,6 +13,8 @@ import click
 @click.option('--nrbins', type=int, default=50)
 @click.option('--get_monopole', type=bool, default=True)
 @click.option('--get_rmu', type=bool, default=False)
+@click.option('--get_filter', type=bool, default=True)
+@click.option('--filter_size', type=float, default=20)
 @click.option('--randoms_from_gal', type=bool, default=False)
 
 def run_density_splitter(handle,
@@ -26,6 +28,8 @@ def run_density_splitter(handle,
                         nrbins,
                         get_monopole,
                         get_rmu,
+                        get_filter,
+                        filter_size,
                         randoms_from_gal):
 
     ds = DensitySplitter(handle=handle,
@@ -39,6 +43,8 @@ def run_density_splitter(handle,
                         nrbins=nrbins,
                         get_monopole=get_monopole,
                         get_rmu=get_rmu,
+                        get_filter=get_filter,
+                        filter_size=filter_size,
                         randoms_from_gal=randoms_from_gal)
 
 
