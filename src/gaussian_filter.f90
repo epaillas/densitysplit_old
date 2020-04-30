@@ -14,7 +14,7 @@ program density_profiles
     integer*8 :: indx, indy, indz, nrows, ncols
     integer*8 :: ipx, ipy, ipz, ndif
     integer*8 :: ngrid
-    
+    asd
     integer*8, dimension(:, :, :), allocatable :: lirst, nlirst
     integer*8, dimension(:), allocatable :: ll
     
