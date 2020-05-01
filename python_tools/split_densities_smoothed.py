@@ -69,7 +69,7 @@ def split_densities(gal_den_monopole,
     ncentres = f.read_ints()[0]
     print('ncentres: {}'.format(ncentres))
     smoothed_delta = f.read_reals(dtype=np.float64)
-    idx = np.sort(smoothed_delta)
+    idx = np.argsort(smoothed_delta)
 
 
     # assemble individual profiles into an array
@@ -85,7 +85,7 @@ def split_densities(gal_den_monopole,
     profiles = np.asarray(profiles)
 
     # sort profiles according to Delta(r=20mpc/h)
-    sorted_profiles = profiles[smoothed_delta]
+    sorted_profiles = profiles[idx]
 
     # divide profiles by their Delta(r=20mpc/h)
     profiles = {}
