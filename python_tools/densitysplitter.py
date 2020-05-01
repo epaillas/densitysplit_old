@@ -43,12 +43,14 @@ class DensitySplitter:
         else:
             self.GenerateRandomPoints()
 
-        print('Calculating density/velocity profiles.')
         if self.get_monopole:
+            print('Calculating CCF monopole.')
             self.CCF_monopole()
         if self.get_rmu:
+            print('Calculating CCF in r-mu')
             self.CCF_rmu()
         if self.get_filter:
+            print('Calculating Gaussian smoothed Delta.')
             self.gaussian_filter()
         
 
