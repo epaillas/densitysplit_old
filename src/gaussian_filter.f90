@@ -190,7 +190,7 @@ program density_profiles
                 if (dis .gt. dmin .and. dis .lt. dmax) then
                   norm = rfilter ** 3 * (2 * pi) ** (3./2)
                   filter = (1./norm) * exp(- dis ** 2 / (2 * rfilter ** 2))
-                  DD(i) = DD(i) + 1
+                  DD(i) = DD(i) + filter
                 end if
   
     
