@@ -10,11 +10,13 @@ import click
 @click.command()
 @click.option('--gal_den_monopole', type=str, required=True)
 @click.option('--gal_den_rmu', type=str, required=True)
+@click.option('filter_file', type=str, required=True)
 @click.option('--handle', type=str, required=True)
 @click.option('--ndenbins', type=int, required=True)
 
 def split_densities(gal_den_monopole,
                     gal_den_rmu,
+                    filter_file,
                     handle,
                     ndenbins):
 
@@ -34,9 +36,7 @@ def split_densities(gal_den_monopole,
     # read raw data and close file
     rbin = f.read_reals(dtype=np.float64).T
     mubin = f.read_reals(dtype=np.float64).T
-    dd = f.read_reals(dtype=np.float64).reshape(nmubins* nrbins,  ncentres).T
     xi_rmu = f.read_reals(dtype=np.float64).reshape(nmubins* nrbins, ncentres).T
-    xibar_rmu = f.read_reals(dtype=np.float64).reshape(nmubins*nrbins, ncentres).T
     f.close()
 
     # open galaxy density (monopole)

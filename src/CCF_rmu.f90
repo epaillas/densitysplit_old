@@ -3,26 +3,26 @@ program density_profiles
   
   integer, parameter:: dp=kind(0.d0)
   
-  real(dp) :: rgrid, boxsize, diff_vol, cum_vol, rhomed
-  real(dp) :: disx, disy, disz, dis, mu
-  real(dp) :: xvc, yvc, zvc, comx, comy, comz
-  real(dp) :: rwidth, dmax, dmin
-  real(dp) :: muwidth, mumin, mumax
-  real(dp) :: pi = 4.*atan(1.)
+  real*4 :: rgrid, boxsize, diff_vol, cum_vol, rhomed
+  real*4 :: disx, disy, disz, dis, mu
+  real*4 :: xvc, yvc, zvc, comx, comy, comz
+  real*4 :: rwidth, dmax, dmin
+  real*4 :: muwidth, mumin, mumax
+  real*4 :: pi = 4.*atan(1.)
   
-  integer*8 :: ng, nc, nrbin, rind, nmubin, muind
-  integer*8 :: i, ii, jj, ix, iy, iz, ix2, iy2, iz2
-  integer*8 :: indx, indy, indz, nrows, ncols
-  integer*8 :: ipx, ipy, ipz, ndif
-  integer*8 :: ngrid
+  integer*4 :: ng, nc, nrbin, rind, nmubin, muind
+  integer*4 :: i, ii, jj, ix, iy, iz, ix2, iy2, iz2
+  integer*4 :: indx, indy, indz, nrows, ncols
+  integer*4 :: ipx, ipy, ipz, ndif
+  integer*4 :: ngrid
   
-  integer*8, dimension(:, :, :), allocatable :: lirst, nlirst
-  integer*8, dimension(:), allocatable :: ll
+  integer*4, dimension(:, :, :), allocatable :: lirst, nlirst
+  integer*4, dimension(:), allocatable :: ll
   
-  real(dp), dimension(3) :: r, com
-  real(dp), allocatable, dimension(:,:)  :: tracers, centres
-  real(dp), dimension(:, :, :), allocatable :: DD, cum_DD, delta, cum_delta
-  real(dp), dimension(:), allocatable :: rbin, rbin_edges, mubin, mubin_edges
+  real*4, dimension(3) :: r, com
+  real*4, allocatable, dimension(:,:)  :: tracers, centres
+  real*4, dimension(:, :, :), allocatable :: DD, cum_DD, delta, cum_delta
+  real*4, dimension(:), allocatable :: rbin, rbin_edges, mubin, mubin_edges
 
   logical :: has_velocity = .false.
   
