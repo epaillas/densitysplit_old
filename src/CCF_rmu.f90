@@ -233,21 +233,10 @@ program density_profiles
       end do
     end do
 
-
-    cum_DD(i, 1, :) = DD(i, 1, :)
-    do ii = 2, nrbin
-      cum_DD(i, ii, :) = cum_DD(i, ii - 1, :) + DD(i, ii, :)
-    end do
-  
     do ii = 1, nrbin
       do jj = 1, nmubin
-
         diff_vol = 4./3 * pi * (rbin_edges(ii+1)**3 - rbin_edges(ii)**3) / (nmubin)
-        cum_vol = 4./3 * pi * rbin_edges(ii+1)**3 / (nmubin)
-
         delta(i, ii, jj) = DD(i, ii, jj) / (diff_vol * rhomed) - 1
-        cum_delta(i, ii, jj) = cum_DD(i, ii, jj) / (cum_vol * rhomed) - 1
-
       end do
     end do
   end do
@@ -262,11 +251,7 @@ program density_profiles
   write(12) size(mubin)
   write(12) rbin
   write(12) mubin
-  write(12) DD
   write(12) delta
-  write(12) cum_delta
-
-  print*, 'Im using the correct version'
 
   end program density_profiles
   
