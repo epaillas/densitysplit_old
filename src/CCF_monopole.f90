@@ -1,29 +1,27 @@
 program density_profiles
   implicit none
   
-  integer, parameter:: dp=kind(0.d0)
+  real*4 :: rgrid, boxsize, diff_vol, cum_vol, rhomed
+  real*4 :: disx, disy, disz, dis, vr, vlos
+  real*4 :: xvc, yvc, zvc
+  real*4 :: velx, vely, velz
+  real*4 :: rwidth, dmax, dmin
+  real*4 :: pi = 4.*atan(1.)
   
-  real(dp) :: rgrid, boxsize, diff_vol, cum_vol, rhomed
-  real(dp) :: disx, disy, disz, dis, vr, vlos
-  real(dp) :: xvc, yvc, zvc
-  real(dp) :: velx, vely, velz
-  real(dp) :: rwidth, dmax, dmin
-  real(dp) :: pi = 4.*atan(1.)
+  integer*4 :: ng, nc, nrbin, rind
+  integer*4 :: i, ii, ix, iy, iz, ix2, iy2, iz2
+  integer*4 :: indx, indy, indz, nrows, ncols
+  integer*4 :: ipx, ipy, ipz, ndif
+  integer*4 :: ngrid
   
-  integer*8 :: ng, nc, nrbin, rind
-  integer*8 :: i, ii, ix, iy, iz, ix2, iy2, iz2
-  integer*8 :: indx, indy, indz, nrows, ncols
-  integer*8 :: ipx, ipy, ipz, ndif
-  integer*8 :: ngrid
+  integer*4, dimension(:, :, :), allocatable :: lirst, nlirst
+  integer*4, dimension(:), allocatable :: ll
   
-  integer*8, dimension(:, :, :), allocatable :: lirst, nlirst
-  integer*8, dimension(:), allocatable :: ll
-  
-  real(dp), dimension(3) :: r, vel, com
-  real(dp), allocatable, dimension(:,:)  :: tracers, centres
-  real(dp), dimension(:, :), allocatable :: DD, cum_DD, delta, cum_delta
-  real(dp), dimension(:, :), allocatable :: VV_r, VV_los, VV2_los, mean_vr, std_vlos
-  real(dp), dimension(:), allocatable :: rbin, rbin_edges
+  real*4, dimension(3) :: r, vel, com
+  real*4, allocatable, dimension(:,:)  :: tracers, centres
+  real*4, dimension(:, :), allocatable :: DD, cum_DD, delta, cum_delta
+  real*4, dimension(:, :), allocatable :: VV_r, VV_los, VV2_los, mean_vr, std_vlos
+  real*4, dimension(:), allocatable :: rbin, rbin_edges
 
   logical :: has_velocity = .false.
   

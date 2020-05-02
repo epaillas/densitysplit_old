@@ -36,14 +36,14 @@ def split_densities(gal_den_monopole,
 
     # read raw data and close file
     rbin = f.read_reals()
-    gal_dd = f.read_reals(dtype=np.float64).reshape(nbins, ncentres)
-    xi_r = f.read_reals(dtype=np.float64).reshape(nbins, ncentres)
-    xibar_r = f.read_reals(dtype=np.float64).reshape(nbins, ncentres)
+    gal_dd = f.read_reals(dtype=np.float32).reshape(nbins, ncentres)
+    xi_r = f.read_reals(dtype=np.float32).reshape(nbins, ncentres)
+    xibar_r = f.read_reals(dtype=np.float32).reshape(nbins, ncentres)
 
 
     if has_velocity:
-        gal_vr = f.read_reals(dtype=np.float64).reshape(nbins, ncentres)
-        gal_sv_los = f.read_reals(dtype=np.float64).reshape(nbins, ncentres)
+        gal_vr = f.read_reals(dtype=np.float32).reshape(nbins, ncentres)
+        gal_sv_los = f.read_reals(dtype=np.float32).reshape(nbins, ncentres)
 
     f.close()
 
@@ -54,13 +54,13 @@ def split_densities(gal_den_monopole,
     print('ncentres, nbins = ({}, {})'.format(ncentres, nbins))
 
     rbin = f.read_reals()
-    dm_dd = f.read_reals(dtype=np.float64).reshape(nbins, ncentres)
-    delta_r = f.read_reals(dtype=np.float64).reshape(nbins, ncentres)
-    Delta_r = f.read_reals(dtype=np.float64).reshape(nbins, ncentres)
+    dm_dd = f.read_reals(dtype=np.float32).reshape(nbins, ncentres)
+    delta_r = f.read_reals(dtype=np.float32).reshape(nbins, ncentres)
+    Delta_r = f.read_reals(dtype=np.float32).reshape(nbins, ncentres)
 
     if has_velocity:
-        dm_vr = f.read_reals(dtype=np.float64).reshape(nbins, ncentres)
-        dm_sv_los = f.read_reals(dtype=np.float64).reshape(nbins, ncentres)
+        dm_vr = f.read_reals(dtype=np.float32).reshape(nbins, ncentres)
+        dm_sv_los = f.read_reals(dtype=np.float32).reshape(nbins, ncentres)
 
     f.close()
 
@@ -68,7 +68,7 @@ def split_densities(gal_den_monopole,
     f = FortranFile(filter_file, 'r')
     ncentres = f.read_ints()[0]
     print('ncentres: {}'.format(ncentres))
-    smoothed_delta = f.read_reals(dtype=np.float64)
+    smoothed_delta = f.read_reals(dtype=np.float32)
     idx = np.argsort(smoothed_delta)
 
 
