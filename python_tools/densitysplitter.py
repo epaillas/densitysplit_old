@@ -78,6 +78,7 @@ class DensitySplitter:
             y = np.random.uniform(0, self.box_size, self.nrandoms)
             z = np.random.uniform(0, self.box_size, self.nrandoms)
             cout = np.c_[x, y, z]
+            cout = cout.astype('float32')
 
         f = FortranFile(self.centres_file, 'w')
         nrows, ncols = np.shape(cout)

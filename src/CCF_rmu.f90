@@ -1,8 +1,6 @@
 program density_profiles
   implicit none
   
-  integer, parameter:: dp=kind(0.d0)
-  
   real*4 :: rgrid, boxsize, diff_vol, cum_vol, rhomed
   real*4 :: disx, disy, disz, dis, mu
   real*4 :: xvc, yvc, zvc, comx, comy, comz
