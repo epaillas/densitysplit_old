@@ -82,6 +82,7 @@ program density_profiles
       write(*,*) 'Tracer file has velocity information.'
     end if
     write(*,*) 'ntracers dim: ', size(tracers, dim=1), size(tracers, dim=2)
+    write(*,*) 'tracers(min), tracers(max) = ', minval(tracers(1,:)), maxval(tracers(1,:))
   
     open(11, file=input_centres, status='old', form='unformatted')
     read(11) nrows
@@ -91,6 +92,7 @@ program density_profiles
     close(11)
     nc = nrows
     write(*,*) 'ncentres dim: ', size(centres, dim=1), size(centres, dim=2)
+    write(*,*) 'tracers(min), tracers(max) = ', minval(tracers(1,:)), maxval(tracers(1,:))
   
     allocate(DD(nc))
     allocate(delta(nc))

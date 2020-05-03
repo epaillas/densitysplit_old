@@ -7,6 +7,7 @@ from cosmology import Cosmology
 from scipy.integrate import quad, simps
 from scipy.interpolate import RectBivariateSpline, InterpolatedUnivariateSpline, interp1d
 from scipy.optimize import fsolve
+from scipy.signal import savgol_filter
 
 class Model1:
     '''
@@ -57,13 +58,13 @@ class Model1:
         # read real-space monopole
         data = np.genfromtxt(self.xi_r_file)
         self.r_for_xi = data[:,0]
-        xi_r = data[:,-1]
+        xi_r = data[:,-2]
         self.xi_r = InterpolatedUnivariateSpline(self.r_for_xi, xi_r, k=3, ext=3)
 
         # read void-matter correlation function
         data = np.genfromtxt(self.delta_r_file)
         self.r_for_delta = data[:,0]
-        delta_r = data[:,-1]
+        delta_r = data[:,-2]
         self.delta_r = InterpolatedUnivariateSpline(self.r_for_delta, delta_r, k=3, ext=3)
 
         integral = np.zeros_like(self.r_for_delta)
@@ -75,7 +76,8 @@ class Model1:
         # read los velocity dispersion profile
         data = np.genfromtxt(self.sv_file)
         self.r_for_sv = data[:,0]
-        sv = data[:,-1] / data[-1, -1]
+        sv = data[:,-2] / data[-1, -2]
+        sv = savgol_filter(sv, 3, 1)
         self.sv = InterpolatedUnivariateSpline(self.r_for_sv, sv, k=3, ext=3)
 
         # read redshift-space correlation function
@@ -167,9 +169,9 @@ class Model1:
 
                 rpar = true_spar + true_s * scaled_fs8 * rescaled_Delta_r(true_s) * true_mu[j] / 3.
                 sy_central = sigma_v * rescaled_sv(np.sqrt(true_sperp**2 + rpar**2)) * self.iaH
-                y = np.linspace(-3 * sy_central, 3 * sy_central, 100)
+                y = np.linspace(-5 * sy_central, 5 * sy_central, 100)
 
-                rpar = true_spar + true_s* scaled_fs8 * rescaled_Delta_r(true_s) * true_mu[j] / 3. - y
+                rpar = true_spar + true_s * scaled_fs8 * rescaled_Delta_r(true_s) * true_mu[j] / 3. - y
                 rr = np.sqrt(true_sperp ** 2 + rpar ** 2)
                 sy = sigma_v * rescaled_sv(rr) * self.iaH
 
@@ -205,7 +207,7 @@ class Model1:
         counter = 0
         for i in range(len(s)):
             for j in range(len(mu)):
-                xi_smu[j, i] = data[counter, -1]
+                xi_smu[j, i] = data[counter, -2]
                 counter += 1
 
         return s, mu, xi_smu
@@ -266,25 +268,25 @@ class Model2:
         eofz = np.sqrt((self.om_m * (1 + self.eff_z) ** 3 + 1 - self.om_m))
         self.iaH = (1 + self.eff_z) / (100. * eofz) 
 
-        # read covariance matrix
-        if os.path.isfile(self.covmat_file):
-            print('Reading covariance matrix: ' + self.covmat_file)
-            self.cov = np.load(self.covmat_file)
-            self.icov = np.linalg.inv(self.cov)
-        else:
-            sys.exit('Covariance matrix not found.')
+        # # read covariance matrix
+        # if os.path.isfile(self.covmat_file):
+        #     print('Reading covariance matrix: ' + self.covmat_file)
+        #     self.cov = np.load(self.covmat_file)
+        #     self.icov = np.linalg.inv(self.cov)
+        # else:
+        #     sys.exit('Covariance matrix not found.')
 
 
         # read real-space monopole
         data = np.genfromtxt(self.xi_r_file)
         self.r_for_xi = data[:,0]
-        xi_r = data[:,-1]
+        xi_r = data[:,-2]
         self.xi_r = InterpolatedUnivariateSpline(self.r_for_xi, xi_r, k=3, ext=3)
 
         # read void-matter correlation function
         data = np.genfromtxt(self.delta_r_file)
         self.r_for_delta = data[:,0]
-        delta_r = data[:,-1]
+        delta_r = data[:,-2]
         self.delta_r = InterpolatedUnivariateSpline(self.r_for_delta, delta_r, k=3, ext=3)
 
         integral = np.zeros_like(self.r_for_delta)
@@ -406,7 +408,7 @@ class Model2:
         counter = 0
         for i in range(len(s)):
             for j in range(len(mu)):
-                xi_smu[j, i] = data[counter, -1]
+                xi_smu[j, i] = data[counter, -2]
                 counter += 1
 
         return s, mu, xi_smu
@@ -481,13 +483,13 @@ class Model3:
         # read real-space monopole
         data = np.genfromtxt(self.xi_r_file)
         self.r_for_xi = data[:,0]
-        xi_r = data[:,-1]
+        xi_r = data[:,-2]
         self.xi_r = InterpolatedUnivariateSpline(self.r_for_xi, xi_r, k=3, ext=3)
 
         # read void-matter correlation function
         data = np.genfromtxt(self.delta_r_file)
         self.r_for_delta = data[:,0]
-        delta_r = data[:,-1]
+        delta_r = data[:,-2]
         self.delta_r = InterpolatedUnivariateSpline(self.r_for_delta, delta_r, k=3, ext=3)
 
         integral = np.zeros_like(self.r_for_delta)
@@ -499,7 +501,7 @@ class Model3:
         # read radial velocity profile
         data = np.genfromtxt(self.vr_file)
         self.r_for_vr = data[:,0]
-        vr = data[:,-1]
+        vr = data[:,-2]
         dvr = np.gradient(vr, self.r_for_vr)
         self.vr = InterpolatedUnivariateSpline(self.r_for_vr, vr, k=3, ext=3)
         self.dvr = InterpolatedUnivariateSpline(self.r_for_vr, dvr, k=3, ext=3)
@@ -507,11 +509,8 @@ class Model3:
         # read line-of-sight velocity dispersion profile
         data = np.genfromtxt(self.sv_file)
         self.r_for_sv = data[:,0]
-        sv = data[:,-1] / data[-1, -1]
+        sv = data[:,-1] / data[-1, -2]
         self.sv = InterpolatedUnivariateSpline(self.r_for_sv, sv, k=3, ext=3)
-
-        self.s_for_xi = self.r_for_xi
-        self.mu_for_xi = np.linspace(-1, 1, len(self.r_for_xi))
 
         # read redshift-space correlation function
         self.s_for_xi, self.mu_for_xi, xi_smu_obs = self.readCorrFile(self.xi_smu_file)
@@ -666,7 +665,7 @@ class Model3:
         counter = 0
         for i in range(len(s)):
             for j in range(len(mu)):
-                xi_smu[j, i] = data[counter, -1]
+                xi_smu[j, i] = data[counter, -2]
                 counter += 1
 
         return s, mu, xi_smu
