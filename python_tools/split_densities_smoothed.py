@@ -35,7 +35,7 @@ def split_densities(gal_den_monopole,
     print('ncentres, nbins = ({}, {})'.format(ncentres, nbins))
 
     # read raw data and close file
-    rbin = f.read_reals()
+    rbin = f.read_reals(dtype=np.float32)
     gal_dd = f.read_reals(dtype=np.float32).reshape(nbins, ncentres)
     xi_r = f.read_reals(dtype=np.float32).reshape(nbins, ncentres)
     xibar_r = f.read_reals(dtype=np.float32).reshape(nbins, ncentres)
@@ -53,7 +53,7 @@ def split_densities(gal_den_monopole,
     nbins = f.read_ints()[0]
     print('ncentres, nbins = ({}, {})'.format(ncentres, nbins))
 
-    rbin = f.read_reals()
+    rbin = f.read_reals(dtype=np.float32)
     dm_dd = f.read_reals(dtype=np.float32).reshape(nbins, ncentres)
     delta_r = f.read_reals(dtype=np.float32).reshape(nbins, ncentres)
     Delta_r = f.read_reals(dtype=np.float32).reshape(nbins, ncentres)
