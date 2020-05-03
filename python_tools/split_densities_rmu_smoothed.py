@@ -9,7 +9,7 @@ import click
 # read file name from command line
 @click.command()
 @click.option('--gal_den_rmu', type=str, required=True)
-@click.option('filter_file', type=str, required=True)
+@click.option('--filter_file', type=str, required=True)
 @click.option('--handle', type=str, required=True)
 @click.option('--ndenbins', type=int, required=True)
 
