@@ -8,22 +8,20 @@ import click
 
 # read file name from command line
 @click.command()
-@click.option('--gal_den_monopole', type=str, required=True)
 @click.option('--gal_den_rmu', type=str, required=True)
 @click.option('filter_file', type=str, required=True)
 @click.option('--handle', type=str, required=True)
 @click.option('--ndenbins', type=int, required=True)
 
-def split_densities(gal_den_monopole,
-                    gal_den_rmu,
+def split_densities(gal_den_rmu,
                     filter_file,
                     handle,
                     ndenbins):
 
 
     print('\nSplitting densities for the following arguments:')
-    print('gal_den_monopole: {}'.format(gal_den_monopole))
     print('gal_den_rmu: {}'.format(gal_den_rmu))
+    print('filter_file: {}'.format(filter_file))
     print('handle: {}'.format(handle))
 
     # open galaxy density (r-mu bins)
@@ -37,19 +35,6 @@ def split_densities(gal_den_monopole,
     rbin = f.read_reals(dtype=np.float32).T
     mubin = f.read_reals(dtype=np.float32).T
     xi_rmu = f.read_reals(dtype=np.float32).reshape(nmubins* nrbins, ncentres).T
-    f.close()
-
-    # open galaxy density (monopole)
-    f = FortranFile(gal_den_monopole, 'r')
-    ncentres = f.read_ints()[0]
-    nrbins = f.read_ints()[0]
-    print('ncentres, nrbins = ({}, {})'.format(ncentres, nrbins))
-
-    # read raw data and close file
-    rbin = f.read_reals(dtype=np.float32)
-    dd = f.read_reals(dtype=np.float32).reshape(nrbins, ncentres).T
-    xi_r = f.read_reals(dtype=np.float32).reshape(nrbins, ncentres).T
-    xibar_r = f.read_reals(dtype=np.float32).reshape(nrbins, ncentres).T
     f.close()
 
     # open filter file
