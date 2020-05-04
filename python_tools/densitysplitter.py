@@ -62,6 +62,7 @@ class DensitySplitter:
         of length and writes them down
         to an unformatted Fortran 90 file.
         '''
+        np.random.seed(0)
 
         if self.randoms_from_gal:
             print('Randoms will be generated from galaxy positions.')
