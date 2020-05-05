@@ -260,17 +260,22 @@ program density_profiles
       delta(i, ii) = DD(i, ii) / (diff_vol * rhomed) - 1
       cum_delta(i, ii) = cum_DD(i, ii) / (cum_vol * rhomed) - 1
 
+      ! if (has_velocity) then
+      !   if (DD(i, ii) .gt. 1) then
+      !     mean_vr(i, ii) = VV_r(i, ii) / DD(i, ii)
+      !     std_vlos(i, ii) = sqrt((VV2_los(i, ii) - (VV_los(i, ii) ** 2 / DD(i, ii))) / (DD(i, ii) - 1))
+      !   else if (DD(i, ii) .eq. 1) then
+      !     mean_vr(i, ii) = VV_r(i, ii) / DD(i, ii)
+      !     std_vlos(i, ii) = 0
+      !   else
+      !     mean_vr(i, ii) = 0
+      !     std_vlos(i, ii) = 0
+      !   end if
+      ! end if
+
       if (has_velocity) then
-        if (DD(i, ii) .gt. 1) then
-          mean_vr(i, ii) = VV_r(i, ii) / DD(i, ii)
-          std_vlos(i, ii) = sqrt((VV2_los(i, ii) - (VV_los(i, ii) ** 2 / DD(i, ii))) / (DD(i, ii) - 1))
-        else if (DD(i, ii) .eq. 1) then
-          mean_vr(i, ii) = VV_r(i, ii) / DD(i, ii)
-          std_vlos(i, ii) = 0
-        else
-          mean_vr(i, ii) = 0
-          std_vlos(i, ii) = 0
-        end if
+        mean_vr(i, ii) = VV_r(i, ii) / DD(i, ii)
+        std_vlos(i, ii) = sqrt((VV2_los(i, ii) - (VV_los(i, ii) ** 2 / DD(i, ii))) / (DD(i, ii) - 1))
       end if
 
     end do
