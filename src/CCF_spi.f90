@@ -214,8 +214,8 @@ program density_profiles
     
                 r = (/ disx, disy, disz /)
                 com = (/ 0, 0, 1 /)
-                para = abs(dot_product(r, com)) / norm2(com)
-                perp = sqrt(norm2(r)**2 - pi**2)
+                para = dot_product(r, com)
+                perp = sqrt(norm2(r) ** 2 - para ** 2)
   
                 if (perp .gt. perpmin .and. perp .lt. perpmax .and. &
                     para .gt. paramin .and. para .lt. paramax ) then
