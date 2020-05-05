@@ -97,8 +97,6 @@ def split_densities(gal_den_monopole,
     delta_r = {}
     xibar_r = {}
     Delta_r = {}
-    gal_vr = {}
-    gal_sv_los = {}
 
     for i in range(1, ndenbins + 1):
         den = profiles['den{}'.format(i)]
@@ -106,8 +104,24 @@ def split_densities(gal_den_monopole,
         xibar_r['den{}'.format(i)] = np.mean(den, axis=0)[:,-5]
         delta_r['den{}'.format(i)] = np.mean(den, axis=0)[:,-4]
         Delta_r['den{}'.format(i)] = np.mean(den, axis=0)[:,-3]
-        gal_vr['den{}'.format(i)] = np.mean(den, axis=0)[:,-2]
-        gal_sv_los['den{}'.format(i)] = np.mean(den, axis=0)[:,-1]
+
+    # get average vr
+    gal_vr = {}
+    gal_sv_los = {}
+
+    for i in range(1, ndenbins + 1):
+        gal_vr['den{}'.format(i)] = np.zeros(nbins)
+        gal_sv_los['den{}'.format(i)] = np.zeros(nbins)
+        den = profiles['den{}'.format(i)]
+
+        for j in range(len(den)):
+            weights = den[j, :, 0]
+            gal_vr['den{}'.format(i)] += den[j, :, -2] * weights
+            gal_sv_los['den{}'.format(i)] += den[j, :, -1] * weights
+
+        sumweights = np.sum(den, axis=0)[:,0]
+        gal_vr['den{}'.format(i)] /= sumweights
+        gal_sv_los['den{}'.format(i)] /= sumweights
 
 
     for i in range(1, ndenbins + 1):

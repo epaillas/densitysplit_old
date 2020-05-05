@@ -169,7 +169,7 @@ class Model1:
 
                 rpar = true_spar + true_s * scaled_fs8 * rescaled_Delta_r(true_s) * true_mu[j] / 3.
                 sy_central = sigma_v * rescaled_sv(np.sqrt(true_sperp**2 + rpar**2)) * self.iaH
-                y = np.linspace(-5 * sy_central, 5 * sy_central, 100)
+                y = np.linspace(-3 * sy_central, 3 * sy_central, 100)
 
                 rpar = true_spar + true_s * scaled_fs8 * rescaled_Delta_r(true_s) * true_mu[j] / 3. - y
                 rr = np.sqrt(true_sperp ** 2 + rpar ** 2)
@@ -180,6 +180,7 @@ class Model1:
                              scaled_fs8 * (rescaled_delta_r(rr) - 2 * rescaled_Delta_r(rr) / 3.) * true_mu[j]**2)
                 integrand = integrand * np.exp(-(y**2) / (2 * sy**2)) / (np.sqrt(2 * np.pi) * sy)
                 xi_model[j] = np.trapz(integrand, y) - 1
+
 
 
             # build interpolating function for xi_smu at true_mu
