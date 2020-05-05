@@ -273,10 +273,11 @@ program density_profiles
       !   end if
       ! end if
 
-      if (has_velocity) then
-        mean_vr(i, ii) = VV_r(i, ii) / DD(i, ii)
-        std_vlos(i, ii) = sqrt((VV2_los(i, ii) - (VV_los(i, ii) ** 2 / DD(i, ii))) / (DD(i, ii) - 1))
-      end if
+      ! Need to save VV_r and VV2_2 los separately, average in post processing
+      ! if (has_velocity) then
+      !   mean_vr(i, ii) = VV_r(i, ii) / DD(i, ii)
+      !   std_vlos(i, ii) = sqrt((VV2_los(i, ii) - (VV_los(i, ii) ** 2 / DD(i, ii))) / (DD(i, ii) - 1))
+      ! end if
 
     end do
   end do
@@ -293,8 +294,9 @@ program density_profiles
   write(12) delta
   write(12) cum_delta
   if (has_velocity) then
-    write(12) mean_vr
-    write(12) std_vlos
+    write(12) VV_r
+    write(12) VV_los
+    write(12) VV2_los
   end if
 
   end program density_profiles
