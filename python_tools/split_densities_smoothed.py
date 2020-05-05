@@ -42,8 +42,9 @@ def split_densities(gal_den_monopole,
 
 
     if has_velocity:
-        gal_vr = f.read_reals(dtype=np.float32).reshape(nbins, ncentres)
-        gal_sv_los = f.read_reals(dtype=np.float32).reshape(nbins, ncentres)
+        gal_vv_r = f.read_reals(dtype=np.float32).reshape(nbins, ncentres)
+        gal_vv_los = f.read_reals(dtype=np.float32).reshape(nbins, ncentres)
+        gal_vv2_los = f.read_reals(dtype=np.float32).reshape(nbins, ncentres)
 
     f.close()
 
@@ -59,8 +60,9 @@ def split_densities(gal_den_monopole,
     Delta_r = f.read_reals(dtype=np.float32).reshape(nbins, ncentres)
 
     if has_velocity:
-        dm_vr = f.read_reals(dtype=np.float32).reshape(nbins, ncentres)
-        dm_sv_los = f.read_reals(dtype=np.float32).reshape(nbins, ncentres)
+        dm_vv_r = f.read_reals(dtype=np.float32).reshape(nbins, ncentres)
+        dm_vv_los = f.read_reals(dtype=np.float32).reshape(nbins, ncentres)
+        dm_vv2_los = f.read_reals(dtype=np.float32).reshape(nbins, ncentres)
 
     f.close()
 
@@ -74,13 +76,19 @@ def split_densities(gal_den_monopole,
 
     # assemble individual profiles into an array
     if has_velocity:
-        profiles = [np.c_[gal_dd[:,i], xi_r[:,i], xibar_r[:,i],
-                    delta_r[:,i], Delta_r[:,i],
-                    gal_vr[:,i], gal_sv_los[:,i]] for i in range(ncentres)]
+        profiles = [np.c_[gal_dd[:,i],
+                          xi_r[:,i],
+                          xibar_r[:,i],
+                          delta_r[:,i],
+                          Delta_r[:,i],
+                          gal_vv_r[:,i],
+                          gal_vv_los[:,i],
+                          gal_vv2_los[:,i]] for i in range(ncentres)]
     else:
-        profiles = [np.c_[gal_dd[:,i], xi_r[:,i], xibar_r[:,i],
-                    Delta_r[:,i]]
-                    for i in range(ncentres)]
+        profiles = [np.c_[gal_dd[:,i],
+                          xi_r[:,i],
+                          xibar_r[:,i],
+                          Delta_r[:,i]] for i in range(ncentres)]
 
     profiles = np.asarray(profiles)
 
@@ -97,17 +105,24 @@ def split_densities(gal_den_monopole,
     delta_r = {}
     xibar_r = {}
     Delta_r = {}
+    dd = {}
     gal_vr = {}
     gal_sv_los = {}
 
+
     for i in range(1, ndenbins + 1):
         den = profiles['den{}'.format(i)]
-        xi_r['den{}'.format(i)] = np.mean(den, axis=0)[:,-6]
-        xibar_r['den{}'.format(i)] = np.mean(den, axis=0)[:,-5]
-        delta_r['den{}'.format(i)] = np.mean(den, axis=0)[:,-4]
-        Delta_r['den{}'.format(i)] = np.mean(den, axis=0)[:,-3]
-        gal_vr['den{}'.format(i)] = np.mean(den, axis=0)[:,-2]
-        gal_sv_los['den{}'.format(i)] = np.mean(den, axis=0)[:,-1]
+        dd = np.sum(den, axis=0)[:,-8]
+        xi_r['den{}'.format(i)] = np.mean(den, axis=0)[:,-7]
+        xibar_r['den{}'.format(i)] = np.mean(den, axis=0)[:,-6]
+        delta_r['den{}'.format(i)] = np.mean(den, axis=0)[:,-5]
+        Delta_r['den{}'.format(i)] = np.mean(den, axis=0)[:,-4]
+        vv_r = np.sum(den, axis=0)[:,-3]
+        vv_los = np.sum(den, axis=0)[:,-2]
+        vv2_los = np.sum(den, axis=0)[:,-1]
+
+        gal_vr['den{}'.format(i)] = vv_r / dd
+        gal_sv_los['den{}'.format(i)] = np.sqrt((vv2_los - (vv_los**2 / dd)) / (dd - 1))
 
 
     for i in range(1, ndenbins + 1):
