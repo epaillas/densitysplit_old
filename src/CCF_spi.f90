@@ -58,7 +58,7 @@ program density_profiles
     read(ngrid_char, *) ngrid
     
     write(*,*) '-----------------------'
-    write(*,*) 'Running density_profiles.exe'
+    write(*,*) 'Running CCF_spi.exe'
     write(*,*) 'input parameters:'
     write(*,*) ''
     write(*, *) 'input_tracers: ', trim(input_tracers)
@@ -113,8 +113,8 @@ program density_profiles
       perpbin(i) = perpbin_edges(i+1)-perpwidth/2.
     end do
   
-    paramin = -1
-    paramax = 1
+    paramin = perpmin
+    paramax = perpmax
   
     parawidth = (paramax - paramin) / nparabin
     do i = 1, nparabin + 1
