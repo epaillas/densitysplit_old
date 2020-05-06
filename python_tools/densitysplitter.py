@@ -173,3 +173,30 @@ class DensitySplitter:
         log = open(logfile, "w+")
         subprocess.call(cmd, stdout=log, stderr=log)
 
+    def CCF_spi(self):
+        '''
+        Computes delta(r) profiles from
+        the random centres in bins of s and pi.
+        '''
+        if self.is_matter:
+            fout = self.handle + '.CCF_DM_spi.unf'
+            logfile = self.handle + '.CCF_DM_spi.log'
+        else:
+            fout = self.handle + '.CCF_gal_spi.unf'
+            logfile = self.handle + '.CCF_gal_spi.log'
+
+        if self.is_box:
+            binpath = sys.path[0] + '/bin/'
+            cmd = [binpath + 'CCF_spi.exe',
+                   self.tracer_file,
+                   self.centres_file,
+                   fout,
+                   str(self.box_size),
+                   str(self.dmin),
+                   str(self.dmax),
+                   str(self.nrbins),
+                   str(self.ngrid)]
+        
+        log = open(logfile, "w+")
+        subprocess.call(cmd, stdout=log, stderr=log)
+

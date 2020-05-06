@@ -58,7 +58,7 @@ program density_profiles
   read(ngrid_char, *) ngrid
   
   write(*,*) '-----------------------'
-  write(*,*) 'Running density_profiles.exe'
+  write(*,*) 'Running CCF_rmu.exe'
   write(*,*) 'input parameters:'
   write(*,*) ''
   write(*, *) 'input_tracers: ', trim(input_tracers)
