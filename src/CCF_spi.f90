@@ -235,7 +235,9 @@ program density_profiles
   
       do ii = 1, nperpbin
         do jj = 1, nparabin
-          diff_vol = 2 * pi * (paramax - paramin) * (perpmax**2 - perpmin**2)
+          diff_vol = 2 * pi * (parabin_edges(jj + 1) - parabin_edges(jj))&
+                     * (perpbin_edges(ii + 1)**2 - perpbin_edges(ii)**2)
+                     
           delta(i, ii, jj) = DD(i, ii, jj) / (diff_vol * rhomed) - 1
         end do
       end do
