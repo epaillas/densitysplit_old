@@ -25,6 +25,8 @@ def mean_from_mocks(handle_in,
         file_ext = ['CCF_gal_monopole', 'CCF_DM_monopole']
     elif corr_type =='rmu':
         file_ext = ['CCF_gal_rmu']
+    elif corr_type == 'spi':
+        file_ext = ['CCF_gal_spi']
     else:
         sys.exit('Correlation type not recognized.')
 
