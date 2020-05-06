@@ -28,7 +28,7 @@ class Model1:
         # full fit (monopole + quadrupole)
         self.full_fit = bool(full_fit)
 
-        print("Setting up redshift-space distortions model.")
+        print("Setting up redshift-space distortions Model 1.")
 
         # cosmology for Minerva
         self.om_m = 0.285
@@ -46,13 +46,13 @@ class Model1:
         eofz = np.sqrt((self.om_m * (1 + self.eff_z) ** 3 + 1 - self.om_m))
         self.iaH = (1 + self.eff_z) / (100. * eofz) 
 
-        # # read covariance matrix
-        # if os.path.isfile(self.covmat_file):
-        #     print('Reading covariance matrix: ' + self.covmat_file)
-        #     self.cov = np.load(self.covmat_file)
-        #     self.icov = np.linalg.inv(self.cov)
-        # else:
-        #     sys.exit('Covariance matrix not found.')
+        # read covariance matrix
+        if os.path.isfile(self.covmat_file):
+            print('Reading covariance matrix: ' + self.covmat_file)
+            self.cov = np.load(self.covmat_file)
+            self.icov = np.linalg.inv(self.cov)
+        else:
+            sys.exit('Covariance matrix not found.')
 
 
         # read real-space monopole
@@ -124,7 +124,7 @@ class Model1:
         fs8, sigma_v, epsilon = theta
 
 
-        if 0.1 < fs8 < 2.0 and 50 < sigma_v < 500 and 0.8 < epsilon < 1.2:
+        if 0.1 < fs8 < 2.0 and 1 < sigma_v < 500 and 0.8 < epsilon < 1.2:
             return 0.0
         
         return -np.inf
@@ -169,7 +169,7 @@ class Model1:
 
                 rpar = true_spar + true_s * scaled_fs8 * rescaled_Delta_r(true_s) * true_mu[j] / 3.
                 sy_central = sigma_v * rescaled_sv(np.sqrt(true_sperp**2 + rpar**2)) * self.iaH
-                y = np.linspace(-3 * sy_central, 3 * sy_central, 100)
+                y = np.linspace(-5 * sy_central, 5 * sy_central, 100)
 
                 rpar = true_spar + true_s * scaled_fs8 * rescaled_Delta_r(true_s) * true_mu[j] / 3. - y
                 rr = np.sqrt(true_sperp ** 2 + rpar ** 2)
