@@ -10,8 +10,8 @@ class DensitySplitter:
 
     def __init__(self, handle, tracer_file, centres_file, nrandoms, box_size,
                  dmin, dmax, nrbins, is_box=True, ngrid=100, is_matter=False,
-                 get_monopole=True, get_rmu=False, get_filter=True, filter_size=20,
-                 randoms_from_gal=False):
+                 get_monopole=True, get_rmu=False, get_spi=True,
+                 get_filter=True, filter_size=20, randoms_from_gal=False):
 
         # file names
         self.handle = handle
@@ -20,6 +20,7 @@ class DensitySplitter:
 
         self.get_monopole = get_monopole
         self.get_rmu = get_rmu
+        self.get_spi = get_spi
         self.get_filter = get_filter
         self.is_matter = is_matter
         self.is_box = is_box
@@ -49,6 +50,9 @@ class DensitySplitter:
         if self.get_rmu:
             print('Calculating CCF in r-mu')
             self.CCF_rmu()
+        if self.get_spi:
+            print('Calculating CCF in sigma-pi')
+            self.CCF_spi()
         if self.get_filter:
             print('Calculating Gaussian smoothed Delta.')
             self.gaussian_filter()
