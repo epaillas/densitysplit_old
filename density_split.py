@@ -16,6 +16,7 @@ import click
 @click.option('--get_spi', type=bool, default=False)
 @click.option('--get_filter', type=bool, default=True)
 @click.option('--filter_size', type=float, default=20)
+@click.option('--filter_type', type=str, default='tophat')
 @click.option('--randoms_from_gal', type=bool, default=False)
 
 def run_density_splitter(handle,
@@ -32,6 +33,7 @@ def run_density_splitter(handle,
                         get_spi,
                         get_filter,
                         filter_size,
+                        filter_type,
                         randoms_from_gal):
 
     ds = DensitySplitter(handle=handle,
@@ -48,6 +50,7 @@ def run_density_splitter(handle,
                         get_spi=get_spi,
                         get_filter=get_filter,
                         filter_size=filter_size,
+                        filter_type=filter_type,
                         randoms_from_gal=randoms_from_gal)
 
 

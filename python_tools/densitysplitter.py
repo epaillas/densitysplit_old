@@ -11,7 +11,8 @@ class DensitySplitter:
     def __init__(self, handle, tracer_file, centres_file, nrandoms, box_size,
                  dmin, dmax, nrbins, is_box=True, ngrid=100, is_matter=False,
                  get_monopole=True, get_rmu=False, get_spi=True,
-                 get_filter=True, filter_size=20, randoms_from_gal=False):
+                 get_filter=True, filter_type='tophat', 
+                 filter_size=20, randoms_from_gal=False):
 
         # file names
         self.handle = handle
@@ -31,6 +32,7 @@ class DensitySplitter:
         self.nrbins = nrbins
         self.ngrid = ngrid
         self.filter_size = filter_size
+        self.filter_type = filter_type
         self.randoms_from_gal = randoms_from_gal
 
         print('handle: {}'.format(self.handle))
@@ -54,9 +56,14 @@ class DensitySplitter:
             print('Calculating CCF in sigma-pi')
             self.CCF_spi()
         if self.get_filter:
-            print('Calculating Gaussian smoothed Delta.')
-            self.gaussian_filter()
-        
+            if self.filter_type == 'gaussian':
+                print('Calculating Gaussian smoothed Delta.')
+                self.gaussian_filter()
+            elif self.filter_type == 'tophat':
+                print('Calculating top-hat Delta.')
+                self.tophat_filter()
+            else:
+                sys.exit('Filter type not recognized. Aborting...')  
 
 
 
@@ -137,6 +144,33 @@ class DensitySplitter:
         if self.is_box:
             binpath = sys.path[0] + '/bin/'
             cmd = [binpath + 'gaussian_filter.exe',
+                   self.tracer_file,
+                   self.centres_file,
+                   fout,
+                   str(self.box_size),
+                   str(self.dmin),
+                   str(self.dmax),
+                   str(self.filter_size),
+                   str(self.ngrid)]
+        
+        log = open(logfile, "w+")
+        subprocess.call(cmd, stdout=log, stderr=log)
+
+    def tophat_filter(self):
+        '''
+        Computes top-hat Delta
+        for a given filter size.
+        '''
+        if self.is_matter:
+            fout = self.handle + '.DM_TopHatDelta.unf'
+            logfile = self.handle + '.DM_TopHatDelta.log'
+        else:
+            fout = self.handle + '.gal_TopHatDelta.unf'
+            logfile = self.handle + '.gal_TopHatDelta.log'
+
+        if self.is_box:
+            binpath = sys.path[0] + '/bin/'
+            cmd = [binpath + 'tophat_filter.exe',
                    self.tracer_file,
                    self.centres_file,
                    fout,
