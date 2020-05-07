@@ -37,7 +37,7 @@ class Model1:
         self.nmocks = 300
 
         self.eff_z = 0.57
-        self.b = 2.05
+        self.b = 2.01
 
         self.growth = self.cosmo.get_growth(self.eff_z)
         self.f = self.cosmo.get_f(self.eff_z)
@@ -46,13 +46,15 @@ class Model1:
         eofz = np.sqrt((self.om_m * (1 + self.eff_z) ** 3 + 1 - self.om_m))
         self.iaH = (1 + self.eff_z) / (100. * eofz) 
 
-        # read covariance matrix
-        if os.path.isfile(self.covmat_file):
-            print('Reading covariance matrix: ' + self.covmat_file)
-            self.cov = np.load(self.covmat_file)
-            self.icov = np.linalg.inv(self.cov)
-        else:
-            sys.exit('Covariance matrix not found.')
+        # # read covariance matrix
+        # if os.path.isfile(self.covmat_file):
+        #     print('Reading covariance matrix: ' + self.covmat_file)
+        #     self.cov = np.load(self.covmat_file)
+        #     self.icov = np.linalg.inv(self.cov)
+        # else:
+        #     sys.exit('Covariance matrix not found.')
+
+
 
 
         # read real-space monopole
@@ -78,6 +80,7 @@ class Model1:
         self.r_for_sv = data[:,0]
         sv = data[:,-2] / data[-1, -2]
         sv = savgol_filter(sv, 3, 1)
+        #sv = np.ones(len(self.r_for_sv))
         self.sv = InterpolatedUnivariateSpline(self.r_for_sv, sv, k=3, ext=3)
 
         # read redshift-space correlation function
@@ -94,6 +97,7 @@ class Model1:
         self.r_for_sv = self.r_for_sv[idx]
         self.xi0_s = self.xi0_s[idx]
         self.xi2_s = self.xi2_s[idx]
+
 
         if self.full_fit:
             self.datavec = np.concatenate((self.xi0_s, self.xi2_s))
@@ -169,7 +173,7 @@ class Model1:
 
                 rpar = true_spar + true_s * scaled_fs8 * rescaled_Delta_r(true_s) * true_mu[j] / 3.
                 sy_central = sigma_v * rescaled_sv(np.sqrt(true_sperp**2 + rpar**2)) * self.iaH
-                y = np.linspace(-5 * sy_central, 5 * sy_central, 100)
+                y = np.linspace(-3 * sy_central, 3 * sy_central, 100)
 
                 rpar = true_spar + true_s * scaled_fs8 * rescaled_Delta_r(true_s) * true_mu[j] / 3. - y
                 rr = np.sqrt(true_sperp ** 2 + rpar ** 2)
@@ -198,7 +202,7 @@ class Model1:
             
         return monopole, quadrupole
 
-
+    
     def readCorrFile(self, fname):
         data = np.genfromtxt(fname)
         s = np.unique(data[:,0])
@@ -212,6 +216,7 @@ class Model1:
                 counter += 1
 
         return s, mu, xi_smu
+
 
     def _getMonopole(self, s, mu, xi_smu):
         monopole = np.zeros(xi_smu.shape[0])
@@ -231,6 +236,8 @@ class Model1:
             quadrupole[i] = simps(yaxis, xaxis)
 
         return s, quadrupole
+
+    
 
 class Model2:
     '''

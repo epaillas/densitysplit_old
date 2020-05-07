@@ -6,7 +6,7 @@ MLIBS = -lm
 
 #################
 
-EXES = CCF_monopole.exe CCF_rmu.exe CCF_spi.exe gaussian_filter.exe
+EXES = CCF_monopole.exe CCF_rmu.exe CCF_spi.exe gaussian_filter.exe tophat_filter.exe
 
 all: $(EXES)
 
@@ -22,6 +22,9 @@ CCF_spi.exe: CCF_spi.o
 gaussian_filter.exe: gaussian_filter.o
 	$(FC) gaussian_filter.o -o gaussian_filter.exe $(MLIBS)
 
+tophat_filter.exe: tophat_filter.o
+	$(FC) tophat_filter.o -o tophat_filter.exe $(MLIBS)
+
 
 CCF_monopole.o: CCF_monopole.f90
 	$(FC) -c CCF_monopole.f90
@@ -34,6 +37,9 @@ CCF_spi.o: CCF_spi.f90
 
 gaussian_filter.o: gaussian_filter.f90
 	$(FC) -c gaussian_filter.f90
+
+tophat_filter.o: tophat_filter.f90
+	$(FC) -c tophat_filter.f90
 
 install: $(EXES)
 	mv $(EXES) ../bin

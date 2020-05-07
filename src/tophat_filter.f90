@@ -57,7 +57,7 @@ program density_profiles
     read(ngrid_char, *) ngrid
     
     write(*,*) '-----------------------'
-    write(*,*) 'Running gaussian_filter.exe'
+    write(*,*) 'Running tophat_filter.exe'
     write(*,*) 'input parameters:'
     write(*,*) ''
     write(*, *) 'input_tracers: ', trim(input_tracers)
@@ -186,11 +186,8 @@ program density_profiles
                 r = (/ disx, disy, disz /)
                 dis = norm2(r)
   
-  
-                if (dis .gt. dmin .and. dis .lt. dmax) then
-                  norm = rfilter ** 3 * (2 * pi) ** (3./2)
-                  filter = (1./norm) * exp(- dis ** 2 / (2 * rfilter ** 2))
-                  DD(i) = DD(i) + filter
+                if (dis .lt. rfilter) then
+                  DD(i) = DD(i) + 1
                 end if
   
     
@@ -204,9 +201,7 @@ program density_profiles
   
   
     vol = 4./3 * pi * rfilter ** 3
-
     delta(i) = DD(i) / (vol * rhomed) - 1
-  
   
     end do
     
