@@ -1,9 +1,9 @@
 program density_profiles
   implicit none
   
-  real*4 :: rgrid, boxsize, diff_vol, cum_vol, rhomed
+  real*4 :: rgrid, boxsize, vol, rhomed
   real*4 :: disx, disy, disz, dis, mu
-  real*4 :: xvc, yvc, zvc, comx, comy, comz
+  real*4 :: xvc, yvc, zvc
   real*4 :: rwidth, dmax, dmin
   real*4 :: muwidth, mumin, mumax
   real*4 :: pi = 4.*atan(1.)
@@ -26,9 +26,9 @@ program density_profiles
   
   character(20), external :: str
   character(len=500) :: input_tracers, input_centres, output_den
-  character(len=10) :: dmax_char, dmin_char, nrbin_char, ngrid_char, box_char
+  character(len=10) :: dmax_char, dmin_char, nrbin_char, nmubin_char, ngrid_char, box_char
   
-  if (iargc() .ne. 8) then
+  if (iargc() .ne. 9) then
       write(*,*) 'Some arguments are missing.'
       write(*,*) '1) input_data'
       write(*,*) '2) input_centres'
@@ -37,7 +37,8 @@ program density_profiles
       write(*,*) '5) dmin'
       write(*,*) '6) dmax'
       write(*,*) '7) nrbin'
-      write(*,*) '8) ngrid'
+      write(*,*) '8) nmubin'
+      write(*,*) '9) ngrid'
       write(*,*) ''
       stop
     end if
@@ -49,12 +50,14 @@ program density_profiles
   call getarg(5, dmin_char)
   call getarg(6, dmax_char)
   call getarg(7, nrbin_char)
-  call getarg(8, ngrid_char)
+  call getarg(8, nmubin_char)
+  call getarg(9, ngrid_char)
   
   read(box_char, *) boxsize
   read(dmin_char, *) dmin
   read(dmax_char, *) dmax
   read(nrbin_char, *) nrbin
+  read(nmubin_char, *) nmubin
   read(ngrid_char, *) ngrid
   
   write(*,*) '-----------------------'
@@ -94,7 +97,6 @@ program density_profiles
   nc = nrows
   write(*,*) 'ncentres dim: ', size(centres, dim=1), size(centres, dim=2)
 
-  nmubin = nrbin
   allocate(rbin(nrbin))
   allocate(mubin(nmubin))
   allocate(rbin_edges(nrbin + 1))
@@ -234,8 +236,8 @@ program density_profiles
 
     do ii = 1, nrbin
       do jj = 1, nmubin
-        diff_vol = 4./3 * pi * (rbin_edges(ii+1)**3 - rbin_edges(ii)**3) / (nmubin)
-        delta(i, ii, jj) = DD(i, ii, jj) / (diff_vol * rhomed) - 1
+        vol = 4./3 * pi * (rbin_edges(ii+1)**3 - rbin_edges(ii)**3) / (nmubin)
+        delta(i, ii, jj) = DD(i, ii, jj) / (vol * rhomed) - 1
       end do
     end do
   end do
