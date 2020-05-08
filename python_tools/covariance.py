@@ -13,8 +13,8 @@ def readCorrFile(fname):
 
     xi_smu = np.zeros([len(s), len(mu)])
     counter = 0
-    for i in range(len(s)):
-        for j in range(len(mu)):
+    for i in range(len(mu)):
+        for j in range(len(s)):
             xi_smu[j, i] = data[counter, -1]
             counter += 1
 
