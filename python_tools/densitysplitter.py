@@ -30,6 +30,7 @@ class DensitySplitter:
         self.dmin = dmin
         self.dmax = dmax
         self.nrbins = nrbins
+        self.nmubins = 80
         self.ngrid = ngrid
         self.filter_size = filter_size
         self.filter_type = filter_type
@@ -206,6 +207,7 @@ class DensitySplitter:
                    str(self.dmin),
                    str(self.dmax),
                    str(self.nrbins),
+                   str(self.nmubins),
                    str(self.ngrid)]
         
         log = open(logfile, "w+")
