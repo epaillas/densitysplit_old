@@ -37,11 +37,11 @@ if args.model == 1:
                     full_fit=args.full_fit, smin=args.smin, smax=args.smax)
 
     ndim = 3
-    nwalkers = 32
-    niter = 5000
+    nwalkers = 28
+    niter = 10000
 
     fs8 = 0.472
-    sigma_v = 300
+    sigma_v = 360
     epsilon = 1.0
 
     start_params = np.array([fs8, sigma_v, epsilon])

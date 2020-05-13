@@ -140,7 +140,7 @@ class Model1:
         scaled_fs8 = fs8 / self.s8norm
 
         # rescale input monopole functions to account for alpha values
-        mus = np.linspace(0, 1., 101)
+        mus = np.linspace(0, 1., 100)
         r = self.r_for_delta
         rescaled_r = np.zeros_like(r)
         for i in range(len(r)):
@@ -183,10 +183,9 @@ class Model1:
                 xi_model[j] = np.trapz(integrand, y) - 1
 
 
-
             # build interpolating function for xi_smu at true_mu
-            mufunc = InterpolatedUnivariateSpline(true_mu, xi_model, k=3)
-            
+            mufunc = InterpolatedUnivariateSpline(true_mu[np.argsort(true_mu)], xi_model[np.argsort(true_mu)], k=3)
+
             # get multipoles
             xaxis = np.linspace(-1, 1, 1000)
 
