@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from rsdmodel import Model1, Model2
+from rsdmodel import RSDModel
 import os
 import sys
 import argparse
@@ -32,9 +32,15 @@ args = parser.parse_args()
 os.environ["OMP_NUM_THREADS"] = "1"
 
 if args.model == 1:
-    model = Model1(delta_r_file=args.delta_r, xi_r_file=args.xi_r, sv_file=args.sv_r,
-                    xi_smu_file=args.xi_smu, covmat_file=args.covmat,
-                    full_fit=args.full_fit, smin=args.smin, smax=args.smax)
+    model = RSDModel(delta_r_file=args.delta_r,
+                    xi_r_file=args.xi_r,
+                    sv_file=args.sv_r,
+                    xi_smu_file=args.xi_smu,
+                    covmat_file=args.covmat,
+                    full_fit=args.full_fit,
+                    model=args.model,
+                    smin=args.smin,
+                    smax=args.smax)
 
     ndim = 3
     nwalkers = 28
@@ -69,13 +75,18 @@ if args.model == 1:
 
 
 if args.model == 2:
-    model = Model2(delta_r_file=args.delta_r, xi_r_file=args.xi_r,
-                    xi_smu_file=args.xi_smu, covmat_file=args.covmat,
-                    full_fit=args.full_fit, smin=args.smin, smax=args.smax)
+    model = RSDModel(delta_r_file=args.delta_r,
+                     xi_r_file=args.xi_r,
+                     xi_smu_file=args.xi_smu,
+                     covmat_file=args.covmat,
+                     full_fit=args.full_fit,
+                     model=args.model,
+                     smin=args.smin,
+                     smax=args.smax)
 
     ndim = 2
-    nwalkers = 32
-    niter = 5000
+    nwalkers = 28
+    niter = 10000
 
     fs8 = 0.472
     epsilon = 1.0
