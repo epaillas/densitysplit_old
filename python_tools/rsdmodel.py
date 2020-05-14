@@ -221,7 +221,7 @@ class RSDModel:
                 integrand = (1 + rescaled_xi_r(rr)) * \
                             (1 + (scaled_fs8 * rescaled_Delta_r(rr) / 3. - y * true_mu[j] / rr) * (1 - true_mu[j]**2) +
                              scaled_fs8 * (rescaled_delta_r(rr) - 2 * rescaled_Delta_r(rr) / 3.) * true_mu[j]**2)
-                integrand = integrand * np.exp(-(y**2) / (2 * sy_central**2)) / (np.sqrt(2 * np.pi) * sy_central)
+                integrand = integrand * np.exp(-(y**2) / (2 * sy**2)) / (np.sqrt(2 * np.pi) * sy)
                 xi_model[j] = np.trapz(integrand, y) - 1
 
 
