@@ -212,7 +212,7 @@ class RSDModel:
 
                 rpar = true_spar + true_s * scaled_fs8 * rescaled_Delta_r(true_s) * true_mu[j] / 3.
                 sy_central = sigma_v * rescaled_sv(np.sqrt(true_sperp**2 + rpar**2)) * self.iaH
-                y = np.linspace(-3 * sy_central, 3 * sy_central, 100)
+                y = np.linspace(-5 * sy_central, 5 * sy_central, 100)
 
                 rpary = rpar - y
                 rr = np.sqrt(true_sperp ** 2 + rpary ** 2)
