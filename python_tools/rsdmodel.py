@@ -112,6 +112,7 @@ class RSDModel:
         self.s_for_xi, self.mu_for_xi, xi_smu_obs = self.readCorrFile(self.xi_smu_file)
 
         if self.model_as_truth:
+            print('Using the model prediction as the measurement.')
             if self.model == 1:
                 fs8 = self.f * self.s8norm
                 sigma_v = self.sv_converge
