@@ -502,8 +502,8 @@ class JointFit:
                 # read los velocity dispersion profile
                 data = np.genfromtxt(sv_file[denbin])
                 self.r_for_sv[denbin] = data[:,0]
-                self.sv_converge = data[-1, -2]
-                sv = data[:,-2] / self.sv_converge
+                sv_converge = data[-1, -2]
+                sv = data[:,-2] / sv_converge
                 sv = savgol_filter(sv, 3, 1)
                 self.sv[denbin ]= InterpolatedUnivariateSpline(self.r_for_sv[denbin], sv, k=3, ext=3)
 
@@ -514,14 +514,14 @@ class JointFit:
                 print('Using the model prediction as the measurement.')
                 if self.model == 1:
                     fs8 = self.f * self.s8norm
-                    sigma_v = self.sv_converge
+                    sigma_v = sv_converge
                     alpha = 1.0
                     epsilon = 1.0
                     alpha_para = alpha * epsilon ** (-2/3)
                     alpha_perp = epsilon * alpha_para
 
                     self.xi0_s[denbin], self.xi2_s[denbin] = self.model1_theory(fs8,
-                                                                                sigma_v[denbin],
+                                                                                sigma_v,
                                                                                 alpha_perp,
                                                                                 alpha_para,
                                                                                 self.s_for_xi[denbin],
