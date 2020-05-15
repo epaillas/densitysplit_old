@@ -132,7 +132,7 @@ class RSDModel:
             s, self.xi2_s = self._getQuadrupole(self.s_for_xi, self.mu_for_xi, xi_smu_obs)
 
         # restrict measured vectors to the desired fitting scales
-        idx = (s >= self.smin) & (s <= self.smax)
+        idx = (self.s_for_xi >= self.smin) & (self.s_for_xi <= self.smax)
 
         self.s_for_xi = self.s_for_xi[idx]
         self.r_for_xi = self.r_for_xi[idx]
