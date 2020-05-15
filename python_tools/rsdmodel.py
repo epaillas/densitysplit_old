@@ -25,7 +25,8 @@ class RSDModel:
                  smin=0,
                  smax=100,
                  model=1,
-                 const_sv=False):
+                 const_sv=0,
+                 model_as_truth=0):
 
         self.delta_r_file = delta_r_file
         self.xi_r_file = xi_r_file
@@ -37,6 +38,7 @@ class RSDModel:
         self.smax = smax
         self.const_sv = const_sv
         self.model = model
+        self.model_as_truth = model_as_truth
 
         # full fit (monopole + quadrupole)
         self.full_fit = bool(full_fit)
@@ -92,7 +94,8 @@ class RSDModel:
             if self.const_sv:
                 sv = np.ones(len(self.r_for_sv))
             else:
-                sv = data[:,-2] / data[-1, -2]
+                self.sv_converge = data[-1, -2]
+                sv = data[:,-2] self.sv_converge
                 sv = savgol_filter(sv, 3, 1)
             self.sv = InterpolatedUnivariateSpline(self.r_for_sv, sv, k=3, ext=3)
 
@@ -107,8 +110,25 @@ class RSDModel:
 
         # read redshift-space correlation function
         self.s_for_xi, self.mu_for_xi, xi_smu_obs = self.readCorrFile(self.xi_smu_file)
-        s, self.xi0_s = self._getMonopole(self.s_for_xi, self.mu_for_xi, xi_smu_obs)
-        s, self.xi2_s = self._getQuadrupole(self.s_for_xi, self.mu_for_xi, xi_smu_obs)
+
+        if self.model_as_truth:
+            if self.model == 1:
+                fs8 = self.f * self.s8norm
+                sigma_v = self.sv_converge
+                alpha = 1.0
+                epsilon = 1.0
+                alpha_para = alpha * epsilon ** (-2/3)
+                alpha_perp = epsilon * alpha_para
+
+                self.xi0_s, self.xi2_s = self.model1_theory(fs8,
+                                                            sigma_v,
+                                                            alpha_perp,
+                                                            alpha_para,
+                                                            self.s_for_xi,
+                                                            self.mu_for_xi)
+        else:
+            s, self.xi0_s = self._getMonopole(self.s_for_xi, self.mu_for_xi, xi_smu_obs)
+            s, self.xi2_s = self._getQuadrupole(self.s_for_xi, self.mu_for_xi, xi_smu_obs)
 
         # restrict measured vectors to the desired fitting scales
         idx = (s >= self.smin) & (s <= self.smax)
@@ -182,7 +202,7 @@ class RSDModel:
         scaled_fs8 = fs8 / self.s8norm
 
         # rescale input monopole functions to account for alpha values
-        mus = np.linspace(0, 1., 100)
+        mus = np.linspace(0, 1., 51)
         r = self.r_for_delta
         rescaled_r = np.zeros_like(r)
         for i in range(len(r)):
@@ -282,7 +302,9 @@ class RSDModel:
 
 
             # build interpolating function for xi_smu at true_mu
-            mufunc = InterpolatedUnivariateSpline(true_mu[np.argsort(true_mu)], xi_model[np.argsort(true_mu)], k=3)
+            mufunc = InterpolatedUnivariateSpline(true_mu[np.argsort(true_mu)],
+                                                  xi_model[np.argsort(true_mu)],
+                                                  k=3)
 
             # get multipoles
             xaxis = np.linspace(-1, 1, 1000)
@@ -340,7 +362,7 @@ class RSDModel:
                     rperp = true_sperp
                     r = np.sqrt(rpar**2 + rperp**2)
                     mu = rpar / r
-                    res = rpar - true_spar + rescaled_vr(r)*mu**2 * self.iaH
+                    res = rpar - true_spar + rescaled_vr(r)*mu * self.iaH
                     return res
 
                 rpar = fsolve(func=residual, x0=true_spar)[0]
@@ -348,16 +370,10 @@ class RSDModel:
                 sy_central = sigma_v * rescaled_sv(np.sqrt(true_sperp**2 + rpar**2)) * self.iaH
                 y = np.linspace(-5 * sy_central, 5 * sy_central, 100)
 
-                rpar = fsolve(func=residual, x0=true_spar)[0] - y
-                rr = np.sqrt(true_sperp ** 2 + rpar ** 2)
+                rpary = rpar - y
+                rr = np.sqrt(true_sperp ** 2 + rpary ** 2)
                 sy = sigma_v * rescaled_sv(rr) * self.iaH
 
-
-                # integrand = (1 + rescaled_xi_r(rr)) * \
-                #             (1 + (scaled_fs8 * rescaled_Delta_r(rr) / 3. - y * true_mu[j] / rr) * (1 - true_mu[j]**2) +
-                #              scaled_fs8 * (rescaled_delta_r(rr) - 2 * rescaled_Delta_r(rr) / 3.) * true_mu[j]**2)
-                # integrand = integrand * np.exp(-(y**2) / (2 * sy**2)) / (np.sqrt(2 * np.pi) * sy)
-                # xi_model[j] = np.trapz(integrand, y) - 1
 
                 integrand = (1 + rescaled_xi_r(rr)) * (1 + rescaled_vr(rr)/(rr/self.iaH) +\
                                                   (rescaled_dvr(rr) - rescaled_vr(rr)/rr)*self.iaH * true_mu[j]**2)**(-1)
@@ -365,13 +381,13 @@ class RSDModel:
                 integrand = integrand * np.exp(-(y**2) / (2 * sy**2)) / (np.sqrt(2 * np.pi) * sy)
 
                 xi_model[j] = np.trapz(integrand, y) - 1
-
-                # xi_model[j] = (1 + rescaled_xi_r(rr)) * (1 + rescaled_vr(rr)/(rr/self.iaH) +\
-                #                                   (rescaled_dvr(rr) - rescaled_vr(rr)/rr)*self.iaH * true_mu[j]**2)**(-1) - 1 
+ 
 
 
             # build interpolating function for xi_smu at true_mu
-            mufunc = InterpolatedUnivariateSpline(true_mu, xi_model, k=3)
+            mufunc = InterpolatedUnivariateSpline(true_mu[np.argsort(true_mu)],
+                                                  xi_model[np.argsort(true_mu)],
+                                                  k=3)
             
             # get multipoles
             xaxis = np.linspace(-1, 1, 1000)

@@ -21,10 +21,12 @@ parser.add_argument('--xi_r', type=str)
 parser.add_argument('--delta_r', type=str)
 parser.add_argument('--sv_r', type=str)
 parser.add_argument('--covmat', type=str)
-parser.add_argument('--full_fit', type=int)
+parser.add_argument('--full_fit', type=int, default=1)
 parser.add_argument('--smin', type=float)
 parser.add_argument('--smax', type=float)
-parser.add_argument('--model', type=int)
+parser.add_argument('--model', type=int, default=1)
+parser.add_argument('--const_sv', type=int, default=0)
+parser.add_argument('--model_as_truth', type=int, default=0)
 parser.add_argument('--backend_name', type=str)
 
 args = parser.parse_args()  
@@ -39,6 +41,8 @@ if args.model == 1:
                     covmat_file=args.covmat,
                     full_fit=args.full_fit,
                     model=args.model,
+                    const_sv=args.const_sv,
+                    model_as_truth=args.model_as_truth,
                     smin=args.smin,
                     smax=args.smax)
 
