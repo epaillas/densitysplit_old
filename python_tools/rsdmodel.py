@@ -95,7 +95,7 @@ class RSDModel:
                 sv = np.ones(len(self.r_for_sv))
             else:
                 self.sv_converge = data[-1, -2]
-                sv = data[:,-2] self.sv_converge
+                sv = data[:,-2] / self.sv_converge
                 sv = savgol_filter(sv, 3, 1)
             self.sv = InterpolatedUnivariateSpline(self.r_for_sv, sv, k=3, ext=3)
 
