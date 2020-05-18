@@ -28,7 +28,7 @@ program density_profiles
     character(len=10) :: dmax_char, dmin_char
     character(len=10) :: ngrid_char, box_char, rfilter_char
     
-    if (iargc() .ne. 8) then
+    if (iargc() .ne. 7) then
         write(*,*) 'Some arguments are missing.'
         write(*,*) '1) input_data'
         write(*,*) '2) input_centres'
@@ -36,8 +36,7 @@ program density_profiles
         write(*,*) '4) boxsize'
         write(*,*) '5) dmin'
         write(*,*) '6) dmax'
-        write(*,*) '7) rfilter'
-        write(*,*) '8) ngrid'
+        write(*,*) '7) ngrid'
         write(*,*) ''
         stop
       end if
@@ -48,8 +47,7 @@ program density_profiles
     call getarg(4, box_char)
     call getarg(5, dmin_char)
     call getarg(6, dmax_char)
-    call getarg(7, rfilter_char)
-    call getarg(8, ngrid_char)
+    call getarg(7, ngrid_char)
     
     read(box_char, *) boxsize
     read(dmin_char, *) dmin
@@ -67,7 +65,6 @@ program density_profiles
     write(*, *) 'output_den: ', trim(output_den)
     write(*, *) 'dmin: ', trim(dmin_char), ' Mpc'
     write(*, *) 'dmax: ', trim(dmax_char), ' Mpc'
-    write(*, *) 'rfilter: ', trim(rfilter_char), 'Mpc'
     write(*, *) 'ngrid: ', trim(ngrid_char)
     write(*,*) ''
   
