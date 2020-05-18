@@ -52,7 +52,6 @@ program density_profiles
     read(box_char, *) boxsize
     read(dmin_char, *) dmin
     read(dmax_char, *) dmax
-    read(rfilter_char, *) rfilter
     read(ngrid_char, *) ngrid
     
     write(*,*) '-----------------------'
