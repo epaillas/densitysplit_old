@@ -45,7 +45,7 @@ def split_densities(centres_file,
     for i in range(1, ndenbins + 1):
         binned_centres['den{}'.format(i)] = sorted_centres[int((i-1)*ncentres/ndenbins):int(i*ncentres/ndenbins)]
 
-        out_file = handle + '_den{}'.format(i) + '.dat.unf'
+        out_file = handle + '_den{}'.format(i) + '.cen.unf'
         cout = binned_centres['den{}'.format(i)] 
         f = FortranFile(out_file, 'w')
         f.write_record(np.shape(cout)[0])
