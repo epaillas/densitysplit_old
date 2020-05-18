@@ -8,7 +8,7 @@ program density_profiles
     real*4 :: dmax, dmin, rfilter
     real*4 :: pi = 4.*atan(1.)
     
-    integer*4 :: ng, nc, counter
+    integer*4 :: ng, nc, counter, cmax
     integer*4 :: i, ii, ix, iy, iz, ix2, iy2, iz2
     integer*4 :: indx, indy, indz, nrows, ncols
     integer*4 :: ipx, ipy, ipz, ndif
@@ -91,8 +91,8 @@ program density_profiles
     write(*,*) 'ncentres dim: ', size(centres, dim=1), size(centres, dim=2)
     write(*,*) 'tracers(min), tracers(max) = ', minval(tracers(1,:)), maxval(tracers(1,:))
   
-    allocate(DD(nc))
-    allocate(delta(nc))
+    cmax = 1000000
+    allocate(DD(cmax))
     
     ! Mean density inside the box
     rhomed = ng / (boxsize ** 3)
@@ -137,7 +137,6 @@ program density_profiles
     write(*,*) 'Starting loop over centres...'
     
     DD = 0
-    delta = 0
     
     counter = 0
     do i = 1, nc
@@ -196,6 +195,7 @@ program density_profiles
   
                 if (dis .gt. dmin .and. dis .lt. dmax) then
                     counter = counter + 1
+                    DD(counter) = vlos
                 end if
   
     
@@ -210,16 +210,13 @@ program density_profiles
   
     end do
 
-    write(*,*) counter
-    stop
-    
     write(*,*) ''
     write(*,*) 'Calculation finished. Writing output...'
     
     open(12, file=output_den, status='replace', form='unformatted')
   
-    write(12) nc
-    write(12) delta
+    write(12) counter
+    write(12) DD
   
     end program density_profiles
     
