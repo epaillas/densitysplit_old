@@ -3,7 +3,7 @@ import sys
 import os
 from astropy.io import fits
 from cosmology import Cosmology
-from scipy.integrate import quad, simps
+from scipy.integrate import quad, simps, odeint
 from scipy.interpolate import RectBivariateSpline, InterpolatedUnivariateSpline, interp1d
 from scipy.optimize import fsolve
 from scipy.signal import savgol_filter
@@ -48,21 +48,26 @@ class SingleFit:
 
         self.eff_z = 0.57
         self.b = 2.01
+        self.dA = self.cosmo.get_comoving_distance(self.eff_z) / (1 + self.eff_z)
+        self.H_at_z = self.cosmo.get_H(self.eff_z)
+
+        #print(self.dA * self.H_at_z / self.cosmo.c)
 
         self.growth = self.cosmo.get_growth(self.eff_z)
         self.f = self.cosmo.get_f(self.eff_z)
+        print(self.f)
         self.s8norm = self.s8 * self.growth 
 
         eofz = np.sqrt((self.om_m * (1 + self.eff_z) ** 3 + 1 - self.om_m))
         self.iaH = (1 + self.eff_z) / (100. * eofz) 
 
-        # read covariance matrix
-        if os.path.isfile(self.covmat_file):
-            print('Reading covariance matrix: ' + self.covmat_file)
-            self.cov = np.load(self.covmat_file)
-            self.icov = np.linalg.inv(self.cov)
-        else:
-            sys.exit('Covariance matrix not found.')
+        # # read covariance matrix
+        # if os.path.isfile(self.covmat_file):
+        #     print('Reading covariance matrix: ' + self.covmat_file)
+        #     self.cov = np.load(self.covmat_file)
+        #     self.icov = np.linalg.inv(self.cov)
+        # else:
+        #     sys.exit('Covariance matrix not found.')
 
         # read real-space monopole
         data = np.genfromtxt(self.xi_r_file)
@@ -82,7 +87,7 @@ class SingleFit:
         Delta_r = 3 * integral / self.r_for_delta ** 3
         self.Delta_r = InterpolatedUnivariateSpline(self.r_for_delta, Delta_r, k=3, ext=3)
 
-        if self.model == 1 or self.model == 3:
+        if self.model == 1 or self.model == 3 or self.model == 4:
             # read los velocity dispersion profile
             data = np.genfromtxt(self.sv_file)
             self.r_for_sv = data[:,0]
@@ -94,7 +99,7 @@ class SingleFit:
                 sv = savgol_filter(sv, 3, 1)
             self.sv = InterpolatedUnivariateSpline(self.r_for_sv, sv, k=3, ext=3)
 
-        if self.model == 3:
+        if self.model == 3 or self.model == 4:
             # read radial velocity profile
             data = np.genfromtxt(self.vr_file)
             self.r_for_vr = data[:,0]
@@ -379,6 +384,122 @@ class SingleFit:
             mufunc = InterpolatedUnivariateSpline(true_mu[np.argsort(true_mu)],
                                                   xi_model[np.argsort(true_mu)],
                                                   k=3)
+            
+            # get multipoles
+            xaxis = np.linspace(-1, 1, 1000)
+
+            yaxis = mufunc(xaxis) / 2
+            monopole[i] = simps(yaxis, xaxis)
+
+            yaxis = mufunc(xaxis) * 5 / 2 * (3 * xaxis**2 - 1) / 2
+            quadrupole[i] = simps(yaxis, xaxis)
+            
+            
+        return monopole, quadrupole
+
+    def model4_theory(self, om_m, sigma_v, alpha_perp, alpha_para, s, mu):
+        import matplotlib.pyplot as plt
+        # fig, ax = plt.subplots()
+        # ax.plot(self.r_for_delta, self.vr(self.r_for_delta), label='measurement')
+
+        monopole = np.zeros(len(s))
+        quadrupole = np.zeros(len(s))
+        true_mu = np.zeros(len(mu))
+        xi_model = np.zeros(len(mu))
+
+        om_l = 1 - om_m
+        z = np.linspace(1000, self.eff_z, 1000)
+        a = 1/(1 + z)
+        t = CosmologicalTime(a, om_m, om_l)(a)
+        delta_lin = np.linspace(-1,2.5, 1000)
+
+        sol1 = []
+        sol2 = []
+
+        for dl in delta_lin:
+            g0 = [1 - dl/3, -dl/3]
+            sol = odeint(SphericalCollapse, g0, t, args=(om_m, om_l))
+            y = sol[:,0]
+            yprime = sol[:,1]
+
+            sol1.append(y[-1]**-3 - 1)
+            sol2.append(yprime[-1])
+
+        interp_den = InterpolatedUnivariateSpline(sol1, delta_lin, k=3)
+        interp_vel = InterpolatedUnivariateSpline(delta_lin, sol2, k=3)
+
+        matched_dls = interp_den(self.Delta_r(self.r_for_delta))
+        matched_vpecs = interp_vel(matched_dls)
+
+        q = self.r_for_delta * a[-1] * (1 + self.Delta_r(self.r_for_delta))**(1/3) 
+        vpec = matched_vpecs * 100 * q
+        dvpec = np.gradient(vpec, self.r_for_delta)
+        self.vr = InterpolatedUnivariateSpline(self.r_for_delta, vpec, k=3)
+        self.dvr = InterpolatedUnivariateSpline(self.r_for_delta, dvpec, k=3)
+
+        # ax.plot(self.r_for_delta, self.vr(self.r_for_delta), label='solve ode')
+        # plt.show()
+        # sys.exit()
+
+        # rescale input monopole functions to account for alpha values
+        mus = np.linspace(0, 1., 100)
+        r = self.r_for_delta
+        rescaled_r = np.zeros_like(r)
+        for i in range(len(r)):
+            rescaled_r[i] = np.trapz((r[i] * alpha_para) * np.sqrt(1. + (1. - mus ** 2) *
+                            (alpha_perp ** 2 / alpha_para ** 2 - 1)), mus)
+
+        x = rescaled_r
+        y1 = self.xi_r(r)
+        y4 = self.vr(r)
+        y5 = self.dvr(r)
+        y6 = self.sv(r)
+
+        # build rescaled interpolating functions using the relabelled separation vectors
+        rescaled_xi_r = InterpolatedUnivariateSpline(x, y1, k=3)
+        rescaled_vr = InterpolatedUnivariateSpline(x, y4, k=3, ext=3)
+        rescaled_dvr = InterpolatedUnivariateSpline(x, y5, k=3, ext=3)
+        rescaled_sv = InterpolatedUnivariateSpline(x, y6, k=3, ext=3)
+        sigma_v = alpha_para * sigma_v
+
+
+        for i in range(len(s)):
+            for j in range(len(mu)):
+                true_sperp = s[i] * np.sqrt(1 - mu[j] ** 2) * alpha_perp
+                true_spar = s[i] * mu[j] * alpha_para
+                true_s = np.sqrt(true_spar ** 2. + true_sperp ** 2.)
+                true_mu[j] = true_spar / true_s
+
+                def residual(rpar):
+                    rperp = true_sperp
+                    r = np.sqrt(rpar**2 + rperp**2)
+                    mu = rpar / r
+                    res = rpar - true_spar + rescaled_vr(r)*mu * self.iaH
+                    return res
+
+                rpar = fsolve(func=residual, x0=true_spar)[0]
+
+                sy_central = sigma_v * rescaled_sv(np.sqrt(true_sperp**2 + rpar**2)) * self.iaH
+                y = np.linspace(-5 * sy_central, 5 * sy_central, 100)
+
+                rpary = rpar - y
+                rr = np.sqrt(true_sperp ** 2 + rpary ** 2)
+                sy = sigma_v * rescaled_sv(rr) * self.iaH
+
+
+                integrand = (1 + rescaled_xi_r(rr)) * (1 + rescaled_vr(rr)/(rr/self.iaH) +\
+                                                (rescaled_dvr(rr) - rescaled_vr(rr)/rr)*self.iaH * true_mu[j]**2)**(-1)
+
+                integrand = integrand * np.exp(-(y**2) / (2 * sy**2)) / (np.sqrt(2 * np.pi) * sy)
+
+                xi_model[j] = np.trapz(integrand, y) - 1
+
+
+
+            # build interpolating function for xi_smu at true_mu
+            mufunc = InterpolatedUnivariateSpline(true_mu[np.argsort(true_mu)],
+                                                xi_model[np.argsort(true_mu)],
+                                                k=3)
             
             # get multipoles
             xaxis = np.linspace(-1, 1, 1000)
@@ -714,5 +835,36 @@ def getQuadrupole(s, mu, xi_smu):
         quadrupole[i] = simps(yaxis, xaxis)
 
     return s, quadrupole
+
+def SphericalCollapse(g, t, om_m0, om_l0):
+    '''
+    Collapse of a spherical shell. Solution to the ODE
+
+    y'' + (1/2 - 3/2 w om_l) y' + om_m/2 (y^{-3} - 1) y = 0
+
+    Let h = y'
+    h' + (1/2 - 3/2 w om_l) h + om_m/2 (y^{-3} - 1) y = 0
+    '''
+    om_m = om_m0 / (om_m0 + om_l0 * t**3)
+    om_l = om_l0 / (om_m0 * t**(-3) + om_l0)
+    y, h = g
+    dgda = [h, -(1/2 + 3/2*om_l)*h - om_m/2*(y**(-3) - 1)*y]
+    return dgda
+
+def TimeIntegral(a, om_m, om_l):
+    # Integrand of age of Universe integral
+    return 1/np.sqrt(om_m * a ** -1 + om_l * a ** 2)
+
+def CosmologicalTime(a, om_m, om_l):
+    H0 = 100
+    t = []
+    for i in a:
+	    ans_i = quad(TimeIntegral, 0, i, args=(om_m, om_l))[0]
+	    t.append((1/(H0))*ans_i)
+    t = np.asarray(t)
+
+    time_to_a = InterpolatedUnivariateSpline(a, t, k=3)
+
+    return time_to_a
 
 

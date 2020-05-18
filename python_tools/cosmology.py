@@ -21,6 +21,9 @@ class Cosmology:
         self.rtab = rtab
         self.s8 = s8
 
+    def get_H(self, z):
+        return 100 * np.sqrt(self.om_m * (1 + z) ** 3 + self.om_l)
+
     # comoving distance in Mpc/h
     def get_comoving_distance(self, z):
         return np.interp(z, self.ztab, self.rtab)
