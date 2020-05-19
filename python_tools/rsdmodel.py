@@ -61,13 +61,13 @@ class SingleFit:
         eofz = np.sqrt((self.om_m * (1 + self.eff_z) ** 3 + 1 - self.om_m))
         self.iaH = (1 + self.eff_z) / (100. * eofz) 
 
-        # # read covariance matrix
-        # if os.path.isfile(self.covmat_file):
-        #     print('Reading covariance matrix: ' + self.covmat_file)
-        #     self.cov = np.load(self.covmat_file)
-        #     self.icov = np.linalg.inv(self.cov)
-        # else:
-        #     sys.exit('Covariance matrix not found.')
+        # read covariance matrix
+        if os.path.isfile(self.covmat_file):
+            print('Reading covariance matrix: ' + self.covmat_file)
+            self.cov = np.load(self.covmat_file)
+            self.icov = np.linalg.inv(self.cov)
+        else:
+            sys.exit('Covariance matrix not found.')
 
         # read real-space monopole
         data = np.genfromtxt(self.xi_r_file)
