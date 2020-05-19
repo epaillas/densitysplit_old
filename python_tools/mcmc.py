@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from rsdmodel import RSDModel
+from rsdmodel import SingleFit
 import os
 import sys
 import argparse
@@ -34,7 +34,7 @@ args = parser.parse_args()
 os.environ["OMP_NUM_THREADS"] = "1"
 
 if args.model == 1:
-    model = RSDModel(delta_r_file=args.delta_r,
+    model = SingleFit(delta_r_file=args.delta_r,
                     xi_r_file=args.xi_r,
                     sv_file=args.sv_r,
                     xi_smu_file=args.xi_smu,

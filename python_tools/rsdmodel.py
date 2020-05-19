@@ -397,28 +397,30 @@ class SingleFit:
             
         return monopole, quadrupole
 
-    def model4_theory(self, om_m, sigma_v, alpha_perp, alpha_para, s, mu):
-        import matplotlib.pyplot as plt
-        # fig, ax = plt.subplots()
-        # ax.plot(self.r_for_delta, self.vr(self.r_for_delta), label='measurement')
+    def model4_theory(self, om_m0, sigma_v, alpha_perp, alpha_para, s, mu):
+        #import matplotlib.pyplot as plt
+        #fig, ax = plt.subplots()
+        #ax.plot(self.r_for_delta, self.vr(self.r_for_delta), label='measurement')
 
         monopole = np.zeros(len(s))
         quadrupole = np.zeros(len(s))
         true_mu = np.zeros(len(mu))
         xi_model = np.zeros(len(mu))
 
-        om_l = 1 - om_m
-        z = np.linspace(1000, self.eff_z, 1000)
+        om_l0 = 1 - om_m0
+        zi = 999
+        zf = self.eff_z
+        z = np.linspace(zi, zf, 100)
         a = 1/(1 + z)
-        t = CosmologicalTime(a, om_m, om_l)(a)
-        delta_lin = np.linspace(-1,2.5, 1000)
+        t = CosmologicalTime(zi, zf)
+        delta_lin = np.linspace(-0.01, 0.0025, 1000)
 
         sol1 = []
         sol2 = []
 
         for dl in delta_lin:
             g0 = [1 - dl/3, -dl/3]
-            sol = odeint(SphericalCollapse, g0, t, args=(om_m, om_l))
+            sol = odeint(SphericalCollapse, g0, t, args=(om_m0, om_l0))
             y = sol[:,0]
             yprime = sol[:,1]
 
@@ -431,15 +433,17 @@ class SingleFit:
         matched_dls = interp_den(self.Delta_r(self.r_for_delta))
         matched_vpecs = interp_vel(matched_dls)
 
+        H = Hubble(a=a[-1], om_m0=om_m0, om_l0=om_l0)
         q = self.r_for_delta * a[-1] * (1 + self.Delta_r(self.r_for_delta))**(1/3) 
-        vpec = matched_vpecs * 100 * q
+        vpec = matched_vpecs * H * q
         dvpec = np.gradient(vpec, self.r_for_delta)
+
         self.vr = InterpolatedUnivariateSpline(self.r_for_delta, vpec, k=3)
         self.dvr = InterpolatedUnivariateSpline(self.r_for_delta, dvpec, k=3)
 
-        # ax.plot(self.r_for_delta, self.vr(self.r_for_delta), label='solve ode')
-        # plt.show()
-        # sys.exit()
+        #ax.plot(self.r_for_delta, self.vr(self.r_for_delta), label='solve ode')
+        #plt.show()
+        #sys.exit()
 
         # rescale input monopole functions to account for alpha values
         mus = np.linspace(0, 1., 100)
@@ -836,7 +840,7 @@ def getQuadrupole(s, mu, xi_smu):
 
     return s, quadrupole
 
-def SphericalCollapse(g, t, om_m0, om_l0):
+def SphericalCollapse(g, lna, om_m0, om_l0):
     '''
     Collapse of a spherical shell. Solution to the ODE
 
@@ -845,26 +849,29 @@ def SphericalCollapse(g, t, om_m0, om_l0):
     Let h = y'
     h' + (1/2 - 3/2 w om_l) h + om_m/2 (y^{-3} - 1) y = 0
     '''
-    om_m = om_m0 / (om_m0 + om_l0 * t**3)
-    om_l = om_l0 / (om_m0 * t**(-3) + om_l0)
+    om_m = Omega_m(lna, om_m0=om_m0, om_l0=om_l0)
+    om_l = Omega_L(lna, om_m0=om_m0, om_l0=om_l0)
     y, h = g
     dgda = [h, -(1/2 + 3/2*om_l)*h - om_m/2*(y**(-3) - 1)*y]
     return dgda
 
-def TimeIntegral(a, om_m, om_l):
-    # Integrand of age of Universe integral
-    return 1/np.sqrt(om_m * a ** -1 + om_l * a ** 2)
+def Omega_m(lna, om_m0, om_l0):
+    a = np.exp(lna)
+    om_m = om_m0 / (om_m0 + om_l0 * a**3)
+    return om_m
 
-def CosmologicalTime(a, om_m, om_l):
-    H0 = 100
-    t = []
-    for i in a:
-	    ans_i = quad(TimeIntegral, 0, i, args=(om_m, om_l))[0]
-	    t.append((1/(H0))*ans_i)
-    t = np.asarray(t)
+def Omega_L(lna, om_m0, om_l0):
+    a = np.exp(lna)
+    om_l = om_l0 / (om_m0 * a**-3 + om_l0)
+    return om_l
 
-    time_to_a = InterpolatedUnivariateSpline(a, t, k=3)
+def CosmologicalTime(zi, zf):
+    ai = np.log(1/(1 + zi))
+    af = np.log(1/(1 + zf))
+    t = np.linspace(ai, af, 10000)
+    return t
 
-    return time_to_a
+def Hubble(a, om_m0, om_l0):
+    return 100 * np.sqrt(om_m0 * a ** -3 + om_l0)
 
 
