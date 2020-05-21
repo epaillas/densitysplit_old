@@ -3,7 +3,7 @@ program density_profiles
     
     real*4 :: rgrid, boxsize, vol, rhomed
     real*4 :: disx, disy, disz, dis
-    real*4 :: xvc, yvc, zvc, norm, filter
+    real*4 :: xvc, yvc, zvc
     real*4 :: dmax, dmin, rfilter
     real*4 :: pi = 4.*atan(1.)
     
@@ -186,7 +186,7 @@ program density_profiles
                 r = (/ disx, disy, disz /)
                 dis = norm2(r)
   
-                if (dis .lt. rfilter) then
+                if (dis .gt. dmin .and. dis .lt. dmax) then
                   DD(i) = DD(i) + 1
                 end if
   
@@ -200,7 +200,7 @@ program density_profiles
       end do
   
   
-    vol = 4./3 * pi * rfilter ** 3
+    vol = 4./3 * pi * (dmax ** 3 - dmin ** 3)
     delta(i) = DD(i) / (vol * rhomed) - 1
   
     end do

@@ -12,30 +12,34 @@ plt.rcParams['text.usetex']=True
 # then the equation becomes
 # h' + (1/2 - 3/2 w om_l) h + om_m/2 (y^{-3} - 1) y = 0
 
-def TimeIntegral(a):
-    return (1./(om_m*a**(-1) + om_l*a**(-1-3*w))**(1/2))
+#def TimeIntegral(a):
+#    return (1./(om_m*a**(-1) + om_l*a**(-1-3*w))**(1/2))
 
-def CosmologicalTime(a):
-    H0 = 100
-    t = []
-    for i in a:
-	    ans_i = quad(TimeIntegral, 0, i)[0]
-	    t.append((1/(H0))*ans_i)
-    t = np.asarray(t)
-
-    t = InterpolatedUnivariateSpline(a, t, k=3)
-
+def CosmologicalTime(zi, zf):
+    ai = np.log(1/(1 + zi))
+    af = np.log(1/(1 + zf))
+    t = np.linspace(ai, af, 10000)
     return t
 
-def sphe(g, a, om_m0, om_l0, w):
-    om_m = om_m0 / (om_m0 + om_l0 * a**(-3*w))
-    om_l = om_l0 / (om_m0 * a**(3*w) + om_l0)
+def Omega_m(lna, om_m0, om_l0):
+    a = np.exp(lna)
+    om_m = om_m0 / (om_m0 + om_l0 * a**3)
+    return om_m
+
+def Omega_L(lna, om_m0, om_l0):
+    a = np.exp(lna)
+    om_l = om_l0 / (om_m0 * a**-3 + om_l0)
+    return om_l
+
+def sphe(g, lna, om_m0, om_l0):
+    om_m = Omega_m(lna, om_m0=om_m0, om_l0=om_l0)
+    om_l = Omega_L(lna, om_m0=om_m0, om_l0=om_l0)
     y, h = g
-    dgda = [h, -(1/2 - 3/2*om_l*w)*h - om_m/2*(y**(-3) - 1)*y]
+    dgda = [h, -(1/2 + 3/2*om_l)*h - om_m/2*(y**(-3) - 1)*y]
     return dgda
 
-def Hubble(a, om_m, om_l):
-    return 100 * np.sqrt(om_m * a ** -3 + om_l)
+def Hubble(a, om_m0, om_l0):
+    return 100 * np.sqrt(om_m0 * a ** -3 + om_l0)
 
 
 delta_r_file = '/Volumes/BlackIce/density_split/den_cats/Real/TopHatProfiles/20Mpc/\
@@ -43,9 +47,6 @@ Galaxies_HOD_z0.57_Real_den5.CCF_DM_monopole'
 
 vr_file = '/Volumes/BlackIce/density_split/den_cats/Real/TopHatProfiles/20Mpc/\
 Galaxies_HOD_z0.57_Real_den5.CCF_gal_vr'
-
-z = np.linspace(10000, 0.57, 1000)
-a = 1/(1 + z)
 
 # read void-matter correlation function
 data = np.genfromtxt(delta_r_file)
@@ -67,13 +68,17 @@ vr = data[:,-2]
 vr = InterpolatedUnivariateSpline(r_for_vr, vr, k=3, ext=3)
 
 
-om_m = 0.285
-om_l = 1 - om_m
+om_m0 = 0.285
+om_l0 = 1 - om_m0
 w = -1
-t = CosmologicalTime(a)(a)
+zi = 999
+zf = 0.57
+z = np.linspace(zi, zf, 100)
+a = 1/(1 + z)
+t = CosmologicalTime(zi, zf)
 
-delta_li = np.linspace(-1,2.5, 1000)
-delta_li = np.linspace(-0.1, 2.5*10**(-3), 1000)
+
+delta_li = np.linspace(-0.01, 0.0025, 1000)
 
 sols1 = []
 sols2 = []
@@ -82,7 +87,7 @@ for dl in delta_li:
 
     g0 = [1 - dl/3, -dl/3]
 
-    sol = odeint(sphe, g0, t, args=(om_m, om_l,w))
+    sol = odeint(sphe, g0, t, args=(om_m0, om_l0))
     y = sol[:,0]
     yprime = sol[:,1]
 
@@ -92,15 +97,24 @@ for dl in delta_li:
 sols1 = np.asarray(sols1)
 sols2 = np.asarray(sols2)
 
+fig, ax = plt.subplots()
+ax.plot(delta_li, sols1)
+plt.show()
+
 interp_den = InterpolatedUnivariateSpline(sols1, delta_li, k=3)
 interp_vel = InterpolatedUnivariateSpline(delta_li, sols2, k=3)
 
 matched_dls = interp_den(Delta_r(r_for_delta))
 matched_vpecs = interp_vel(matched_dls)
 
-H = Hubble(a=a[-1], om_m=om_m, om_l=om_l)
+H = Hubble(a=a[-1], om_m0=om_m0, om_l0=om_l0)
 q = r_for_delta * a[-1] * (1 + Delta_r(r_for_delta))**(1/3) 
-vpec = matched_vpecs * 100 * q
+vpec = matched_vpecs * H * q
+
+fout = '/Volumes/BlackIce/density_split/den_cats/Real/TopHatProfiles/20Mpc/\
+Galaxies_HOD_z0.57_Real_den5.CCF_gal_vr_SphericalModel'
+fmt = 2 * '%10.3f '
+np.savetxt(fout, np.c_[r_for_delta,vpec], fmt=fmt)
 
 fig, ax = plt.subplots(figsize=(6,5))
 f = 0.7596841096514576
@@ -114,5 +128,5 @@ ax.set_ylabel(r'$v_{\mathrm{pec}}\ [\mathrm{km/s}]$', fontsize=17)
 ax.tick_params(labelsize=13)
 ax.legend(fontsize=17)
 plt.tight_layout()
-plt.savefig('/Users/epaillas/Desktop/vr_den5_nonlinear_akashgrid.pdf', format='pdf')
+#plt.savefig('/Users/epaillas/Desktop/vr_den5_nonlinear_akashgrid.pdf', format='pdf')
 plt.show()
