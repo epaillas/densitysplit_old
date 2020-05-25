@@ -438,6 +438,11 @@ class SingleFit:
         vpec = matched_vpecs * H * q
         dvpec = np.gradient(vpec, self.r_for_delta)
 
+        f = 0.7596841096514576
+        delta_c = 10#1.686
+        vpec = -1/3 * self.r_for_delta * a[-1] * f * H * delta_c * ((1 + self.Delta_r(self.r_for_delta))**(1/delta_c) - 1)
+        dvpec = np.gradient(vpec, self.r_for_delta)
+
         self.vr = InterpolatedUnivariateSpline(self.r_for_delta, vpec, k=3)
         self.dvr = InterpolatedUnivariateSpline(self.r_for_delta, dvpec, k=3)
 

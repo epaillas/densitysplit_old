@@ -32,16 +32,16 @@ def split_densities(gal_den_rmu,
     print('ncentres, nrbins, nmubins = ({}, {}, {})'.format(ncentres, nrbins, nmubins))
 
     # read raw data and close file
-    rbin = f.read_reals(dtype=np.float32).T
-    mubin = f.read_reals(dtype=np.float32).T
-    xi_rmu = f.read_reals(dtype=np.float32).reshape(nmubins* nrbins, ncentres).T
+    rbin = f.read_reals(dtype=np.float64).T
+    mubin = f.read_reals(dtype=np.float64).T
+    xi_rmu = f.read_reals(dtype=np.float64).reshape(nmubins* nrbins, ncentres).T
     f.close()
 
     # open filter file
     f = FortranFile(filter_file, 'r')
     ncentres = f.read_ints()[0]
     print('ncentres: {}'.format(ncentres))
-    smoothed_delta = f.read_reals(dtype=np.float32)
+    smoothed_delta = f.read_reals(dtype=np.float64)
     idx = np.argsort(smoothed_delta)
 
     # sort arrays

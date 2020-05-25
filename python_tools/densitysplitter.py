@@ -81,7 +81,7 @@ class DensitySplitter:
             fin = FortranFile(self.tracer_file, 'r')
             nrows = fin.read_ints()[0]
             ncols = fin.read_ints()[0]
-            pos = fin.read_reals(dtype=np.float32).reshape(nrows, ncols)
+            pos = fin.read_reals(dtype=np.float64).reshape(nrows, ncols)
             idx = np.random.choice(nrows, size=self.nrandoms, replace=False)
             cout = pos[idx]
 
@@ -92,7 +92,7 @@ class DensitySplitter:
             z = np.random.uniform(0, self.box_size, self.nrandoms)
             cout = np.c_[x, y, z]
 
-        cout = cout.astype('float32')
+        cout = cout.astype('float64')
         f = FortranFile(self.centres_file, 'w')
         nrows, ncols = np.shape(cout)
         f.write_record(nrows)

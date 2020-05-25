@@ -41,12 +41,12 @@ def sphe(g, lna, om_m0, om_l0):
 def Hubble(a, om_m0, om_l0):
     return 100 * np.sqrt(om_m0 * a ** -3 + om_l0)
 
+idx = 5
+delta_r_file = '/Volumes/BlackIce/density_split/den_cats/Real/GalaxiesAsCentres/TopHatProfiles/20Mpc/\
+Galaxies_HOD_z0.57_Real_den{}.CCF_DM_monopole'.format(idx)
 
-delta_r_file = '/Volumes/BlackIce/density_split/den_cats/Real/TopHatProfiles/20Mpc/\
-Galaxies_HOD_z0.57_Real_den5.CCF_DM_monopole'
-
-vr_file = '/Volumes/BlackIce/density_split/den_cats/Real/TopHatProfiles/20Mpc/\
-Galaxies_HOD_z0.57_Real_den5.CCF_gal_vr'
+vr_file = '/Volumes/BlackIce/density_split/den_cats/Real/GalaxiesAsCentres/TopHatProfiles/20Mpc/\
+Galaxies_HOD_z0.57_Real_den{}.CCF_gal_vr'.format(idx)
 
 # read void-matter correlation function
 data = np.genfromtxt(delta_r_file)
@@ -111,22 +111,25 @@ H = Hubble(a=a[-1], om_m0=om_m0, om_l0=om_l0)
 q = r_for_delta * a[-1] * (1 + Delta_r(r_for_delta))**(1/3) 
 vpec = matched_vpecs * H * q
 
-fout = '/Volumes/BlackIce/density_split/den_cats/Real/TopHatProfiles/20Mpc/\
-Galaxies_HOD_z0.57_Real_den5.CCF_gal_vr_SphericalModel'
-fmt = 2 * '%10.3f '
-np.savetxt(fout, np.c_[r_for_delta,vpec], fmt=fmt)
+# fout = '/Volumes/BlackIce/density_split/den_cats/Real/TopHatProfiles/20Mpc/\
+# Galaxies_HOD_z0.57_Real_den5.CCF_gal_vr_SphericalModel'
+# fmt = 2 * '%10.3f '
+# np.savetxt(fout, np.c_[r_for_delta,vpec], fmt=fmt)
 
 fig, ax = plt.subplots(figsize=(6,5))
 f = 0.7596841096514576
-vpec_lin = -1/3 *f  * H * r_for_delta * a[-1]* Delta_r(r_for_delta)
+delta_c = 4#1.686
+vpec_lin = -1/3 * f  * H * r_for_delta * a[-1]* Delta_r(r_for_delta)
+vpec_nonlin = -1/3 * r_for_delta * a[-1] * f * H * delta_c * ((1 + Delta_r(r_for_delta))**(1/delta_c) - 1) 
 ax.plot(r_for_vr, vr(r_for_vr), label='Measurement',marker='o', mfc='none', mew=1.5, ms=6.0, ls='',
 color='k', alpha=0.7)
 ax.plot(r_for_delta, vpec, label='Solving ODE')
 ax.plot(r_for_delta, vpec_lin, label='Linear approx.')
+ax.plot(r_for_delta, vpec_nonlin, label='Non-linear approx.')
 ax.set_xlabel(r'$r\ [\mathrm{Mpc}/h]$', fontsize=17)
 ax.set_ylabel(r'$v_{\mathrm{pec}}\ [\mathrm{km/s}]$', fontsize=17)
 ax.tick_params(labelsize=13)
 ax.legend(fontsize=17)
 plt.tight_layout()
-#plt.savefig('/Users/epaillas/Desktop/vr_den5_nonlinear_akashgrid.pdf', format='pdf')
+#plt.savefig('/Users/epaillas/Desktop/spherical_den{}.pdf'.format(idx), format='pdf')
 plt.show()

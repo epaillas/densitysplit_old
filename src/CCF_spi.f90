@@ -1,26 +1,26 @@
 program density_profiles
     implicit none
     
-    real*4 :: rgrid, boxsize, diff_vol, rhomed
-    real*4 :: disx, disy, disz, para, perp
-    real*4 :: xvc, yvc, zvc
-    real*4 :: perpwidth, perpmax, perpmin
-    real*4 :: parawidth, paramin, paramax
-    real*4 :: pi = 4.*atan(1.)
+    real*8 :: rgrid, boxsize, diff_vol, rhomed
+    real*8 :: disx, disy, disz, para, perp
+    real*8 :: xvc, yvc, zvc
+    real*8 :: perpwidth, perpmax, perpmin
+    real*8 :: parawidth, paramin, paramax
+    real*8 :: pi = 4.*atan(1.)
     
-    integer*4 :: ng, nc, nperpbin, perpind, nparabin, paraind
-    integer*4 :: i, ii, jj, ix, iy, iz, ix2, iy2, iz2
-    integer*4 :: indx, indy, indz, nrows, ncols
-    integer*4 :: ipx, ipy, ipz, ndif
-    integer*4 :: ngrid
+    integer*8 :: ng, nc, nperpbin, perpind, nparabin, paraind
+    integer*8 :: i, ii, jj, ix, iy, iz, ix2, iy2, iz2
+    integer*8 :: indx, indy, indz, nrows, ncols
+    integer*8 :: ipx, ipy, ipz, ndif
+    integer*8 :: ngrid
     
-    integer*4, dimension(:, :, :), allocatable :: lirst, nlirst
-    integer*4, dimension(:), allocatable :: ll
+    integer*8, dimension(:, :, :), allocatable :: lirst, nlirst
+    integer*8, dimension(:), allocatable :: ll
     
-    real*4, dimension(3) :: r, com
-    real*4, allocatable, dimension(:,:)  :: tracers, centres
-    real*4, dimension(:, :, :), allocatable :: DD, cum_DD, delta, cum_delta
-    real*4, dimension(:), allocatable :: perpbin, perpbin_edges, parabin, parabin_edges
+    real*8, dimension(3) :: r, com
+    real*8, allocatable, dimension(:,:)  :: tracers, centres
+    real*8, dimension(:, :, :), allocatable :: DD, cum_DD, delta, cum_delta
+    real*8, dimension(:), allocatable :: perpbin, perpbin_edges, parabin, parabin_edges
   
     logical :: has_velocity = .false.
     

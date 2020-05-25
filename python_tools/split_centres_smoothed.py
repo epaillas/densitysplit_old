@@ -26,14 +26,14 @@ def split_densities(centres_file,
     ncols = f.read_ints()[0]
     print('nrows, ncols= ({}, {})'.format(nrows, ncols))
     # read raw data and close file
-    centres = f.read_reals(dtype=np.float32).reshape(nrows, ncols)
+    centres = f.read_reals(dtype=np.float64).reshape(nrows, ncols)
     f.close()
 
     # open filter file
     f = FortranFile(filter_file, 'r')
     ncentres = f.read_ints()[0]
     print('ncentres: {}'.format(ncentres))
-    smoothed_delta = f.read_reals(dtype=np.float32)
+    smoothed_delta = f.read_reals(dtype=np.float64)
     idx = np.argsort(smoothed_delta)
     f.close()
 
