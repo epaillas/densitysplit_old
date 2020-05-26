@@ -1,7 +1,7 @@
 program density_profiles
   implicit none
   
-  real*8 :: rgrid, boxsize, vol, rhomed
+  real*8 :: rgrid, boxsize, diff_vol, cum_vol, rhomed
   real*8 :: disx, disy, disz, dis, vr, vlos
   real*8 :: xvc, yvc, zvc
   real*8 :: velx, vely, velz
@@ -19,8 +19,8 @@ program density_profiles
   
   real*8, dimension(3) :: r, vel, com
   real*8, allocatable, dimension(:,:)  :: tracers, centres
-  real*8, dimension(:), allocatable :: DD, delta
-  real*8, dimension(:), allocatable :: VV_r, VV_los, VV2_los, mean_vr, std_vlos
+  real*8, dimension(:, :), allocatable :: DD, cum_DD, delta, cum_delta
+  real*8, dimension(:, :), allocatable :: VV_r, VV_los, VV2_los, mean_vr, std_vlos
   real*8, dimension(:), allocatable :: rbin, rbin_edges
 
   logical :: has_velocity = .false.
@@ -97,14 +97,16 @@ program density_profiles
 
   allocate(rbin(nrbin))
   allocate(rbin_edges(nrbin + 1))
-  allocate(DD(nrbin))
-  allocate(delta(nrbin))
+  allocate(DD(nc, nrbin))
+  allocate(cum_DD(nc, nrbin))
+  allocate(delta(nc, nrbin))
+  allocate(cum_delta(nc, nrbin))
   if (has_velocity) then
-    allocate(VV_r(nrbin))
-    allocate(VV_los(nrbin))
-    allocate(VV2_los(nrbin))
-    allocate(mean_vr(nrbin))
-    allocate(std_vlos(nrbin))
+    allocate(VV_r(nc, nrbin))
+    allocate(VV_los(nc, nrbin))
+    allocate(VV2_los(nc, nrbin))
+    allocate(mean_vr(nc, nrbin))
+    allocate(std_vlos(nc, nrbin))
   end if
   
   
@@ -159,7 +161,9 @@ program density_profiles
   write(*,*) 'Starting loop over centres...'
   
   DD = 0
+  cum_DD = 0
   delta = 0
+  cum_delta = 0
   if (has_velocity) then
     VV_r = 0
     VV_los = 0
@@ -224,14 +228,15 @@ program density_profiles
 
               if (dis .gt. dmin .and. dis .lt. dmax) then
                 rind = int((dis - dmin) / rwidth + 1)
-                DD(rind) = DD(rind) + 1
+                DD(i, rind) = DD(i, rind) + 1
 
                 if (has_velocity) then
-                  VV_r(rind) = VV_r(rind) + vr
-                  VV_los(rind) = VV_los(rind) + vlos
-                  VV2_los(rind) = VV2_los(rind) + vlos**2
+                  VV_r(i, rind) = VV_r(i, rind) + vr
+                  VV_los(i, rind) = VV_los(i, rind) + vlos
+                  VV2_los(i, rind) = VV2_los(i, rind) + vlos**2
                 end if
               end if
+
   
               if(ii.eq.lirst(ix2,iy2,iz2)) exit
   
@@ -240,30 +245,59 @@ program density_profiles
         end do
       end do
     end do
-  end do
 
-  do i = 1, nrbin
-    vol = 4./3 * pi * (rbin_edges(i + 1) ** 3 - rbin_edges(i) ** 3)
-    delta(i) = DD(i) / (vol * rhomed * nc) - 1
 
-    if (has_velocity) then
-      mean_vr(i) = VV_r(i) / DD(i)
-      std_vlos(i) = sqrt((VV2_los(i) - (VV_los(i) ** 2 / DD(i))) / (DD(i) - 1))
-    end if
+    cum_DD(i, 1) = DD(i, 1)
+    do ii = 2, nrbin
+      cum_DD(i, ii) = cum_DD(i, ii - 1) + DD(i, ii)
+    end do
+  
+    do ii = 1, nrbin
 
+      diff_vol = 4./3 * pi * (rbin_edges(ii+1)**3 - rbin_edges(ii)**3)
+      cum_vol = 4./3 * pi * rbin_edges(ii+1)**3
+
+      delta(i, ii) = DD(i, ii) / (diff_vol * rhomed) - 1
+      cum_delta(i, ii) = cum_DD(i, ii) / (cum_vol * rhomed) - 1
+
+      ! if (has_velocity) then
+      !   if (DD(i, ii) .gt. 1) then
+      !     mean_vr(i, ii) = VV_r(i, ii) / DD(i, ii)
+      !     std_vlos(i, ii) = sqrt((VV2_los(i, ii) - (VV_los(i, ii) ** 2 / DD(i, ii))) / (DD(i, ii) - 1))
+      !   else if (DD(i, ii) .eq. 1) then
+      !     mean_vr(i, ii) = VV_r(i, ii) / DD(i, ii)
+      !     std_vlos(i, ii) = 0
+      !   else
+      !     mean_vr(i, ii) = 0
+      !     std_vlos(i, ii) = 0
+      !   end if
+      ! end if
+
+      ! Need to save VV_r and VV2_2 los separately, average in post processing
+      ! if (has_velocity) then
+      !   mean_vr(i, ii) = VV_r(i, ii) / DD(i, ii)
+      !   std_vlos(i, ii) = sqrt((VV2_los(i, ii) - (VV_los(i, ii) ** 2 / DD(i, ii))) / (DD(i, ii) - 1))
+      ! end if
+
+    end do
   end do
   
   write(*,*) ''
   write(*,*) 'Calculation finished. Writing output...'
   
-  open(12, file=output_den, status='replace')
-  do i = 1, nrbin
-    if (has_velocity) then
-      write(12, fmt='(4f10.5)') rbin(i), delta(i), mean_vr(i), std_vlos(i)
-    else
-      write(12, fmt='(2f10.5)') rbin(i), delta(i)
-    end if
-  end do
+  open(12, file=output_den, status='replace', form='unformatted')
+
+  write(12) nc
+  write(12) size(rbin)
+  write(12) rbin
+  write(12) DD
+  write(12) delta
+  write(12) cum_delta
+  if (has_velocity) then
+    write(12) VV_r
+    write(12) VV_los
+    write(12) VV2_los
+  end if
 
   end program density_profiles
   

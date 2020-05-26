@@ -2,14 +2,14 @@ program density_profiles
   implicit none
   
   real*8 :: rgrid, boxsize, vol, rhomed
-  real*8 :: disx, disy, disz, dis, vr, vlos
+  real*8 :: disx, disy, disz, dis, mu
   real*8 :: xvc, yvc, zvc
-  real*8 :: velx, vely, velz
   real*8 :: rwidth, dmax, dmin
+  real*8 :: muwidth, mumin, mumax
   real*8 :: pi = 4.*atan(1.)
   
-  integer*8 :: ng, nc, nrbin, rind
-  integer*8 :: i, ii, ix, iy, iz, ix2, iy2, iz2
+  integer*8 :: ng, nc, nrbin, rind, nmubin, muind
+  integer*8 :: i, ii, jj, ix, iy, iz, ix2, iy2, iz2
   integer*8 :: indx, indy, indz, nrows, ncols
   integer*8 :: ipx, ipy, ipz, ndif
   integer*8 :: ngrid
@@ -17,19 +17,18 @@ program density_profiles
   integer*8, dimension(:, :, :), allocatable :: lirst, nlirst
   integer*8, dimension(:), allocatable :: ll
   
-  real*8, dimension(3) :: r, vel, com
+  real*8, dimension(3) :: r, com
   real*8, allocatable, dimension(:,:)  :: tracers, centres
-  real*8, dimension(:), allocatable :: DD, delta
-  real*8, dimension(:), allocatable :: VV_r, VV_los, VV2_los, mean_vr, std_vlos
-  real*8, dimension(:), allocatable :: rbin, rbin_edges
+  real*8, dimension(:, :, :), allocatable :: DD, cum_DD, delta, cum_delta
+  real*8, dimension(:), allocatable :: rbin, rbin_edges, mubin, mubin_edges
 
   logical :: has_velocity = .false.
   
   character(20), external :: str
   character(len=500) :: input_tracers, input_centres, output_den
-  character(len=10) :: dmax_char, dmin_char, nrbin_char, ngrid_char, box_char
+  character(len=10) :: dmax_char, dmin_char, nrbin_char, nmubin_char, ngrid_char, box_char
   
-  if (iargc() .ne. 8) then
+  if (iargc() .ne. 9) then
       write(*,*) 'Some arguments are missing.'
       write(*,*) '1) input_data'
       write(*,*) '2) input_centres'
@@ -38,7 +37,8 @@ program density_profiles
       write(*,*) '5) dmin'
       write(*,*) '6) dmax'
       write(*,*) '7) nrbin'
-      write(*,*) '8) ngrid'
+      write(*,*) '8) nmubin'
+      write(*,*) '9) ngrid'
       write(*,*) ''
       stop
     end if
@@ -50,16 +50,18 @@ program density_profiles
   call getarg(5, dmin_char)
   call getarg(6, dmax_char)
   call getarg(7, nrbin_char)
-  call getarg(8, ngrid_char)
+  call getarg(8, nmubin_char)
+  call getarg(9, ngrid_char)
   
   read(box_char, *) boxsize
   read(dmin_char, *) dmin
   read(dmax_char, *) dmax
   read(nrbin_char, *) nrbin
+  read(nmubin_char, *) nmubin
   read(ngrid_char, *) ngrid
   
   write(*,*) '-----------------------'
-  write(*,*) 'Running density_profiles.exe'
+  write(*,*) 'Running CCF_rmu.exe'
   write(*,*) 'input parameters:'
   write(*,*) ''
   write(*, *) 'input_tracers: ', trim(input_tracers)
@@ -96,16 +98,13 @@ program density_profiles
   write(*,*) 'ncentres dim: ', size(centres, dim=1), size(centres, dim=2)
 
   allocate(rbin(nrbin))
+  allocate(mubin(nmubin))
   allocate(rbin_edges(nrbin + 1))
-  allocate(DD(nrbin))
-  allocate(delta(nrbin))
-  if (has_velocity) then
-    allocate(VV_r(nrbin))
-    allocate(VV_los(nrbin))
-    allocate(VV2_los(nrbin))
-    allocate(mean_vr(nrbin))
-    allocate(std_vlos(nrbin))
-  end if
+  allocate(mubin_edges(nmubin + 1))
+  allocate(DD(nc, nrbin, nmubin))
+  allocate(cum_DD(nc, nrbin, nmubin))
+  allocate(delta(nc, nrbin, nmubin))
+  allocate(cum_delta(nc, nrbin, nmubin))
   
   
   rwidth = (dmax - dmin) / nrbin
@@ -114,6 +113,17 @@ program density_profiles
   end do
   do i = 1, nrbin
     rbin(i) = rbin_edges(i+1)-rwidth/2.
+  end do
+
+  mumin = -1
+  mumax = 1
+
+  muwidth = (mumax - mumin) / nmubin
+  do i = 1, nmubin + 1
+    mubin_edges(i) = mumin+(i-1)*muwidth
+  end do
+  do i = 1, nmubin
+    mubin(i) = mubin_edges(i+1)-muwidth/2.
   end do
   
   ! Mean density inside the box
@@ -159,14 +169,9 @@ program density_profiles
   write(*,*) 'Starting loop over centres...'
   
   DD = 0
+  cum_DD = 0
   delta = 0
-  if (has_velocity) then
-    VV_r = 0
-    VV_los = 0
-    VV2_los = 0
-    mean_vr = 0
-    std_vlos = 0
-  end if
+  cum_delta = 0
   
   do i = 1, nc
     xvc = centres(1, i)
@@ -210,28 +215,16 @@ program density_profiles
               if (disz .gt. boxsize/2) disz = disz - boxsize
   
               r = (/ disx, disy, disz /)
+              com = (/ 0, 0, 1 /)
               dis = norm2(r)
-
-              if (has_velocity) then
-                velx = tracers(4, ii)
-                vely = tracers(5, ii)
-                velz = tracers(6, ii)
-                vel = (/ velx, vely, velz /)
-                com = (/ 0, 0, 1 /)
-                vr = dot_product(vel, r) / norm2(r)
-                vlos = dot_product(vel, com)
-              end if
+              mu = dot_product(r, com) / (norm2(r) * norm2(com))
 
               if (dis .gt. dmin .and. dis .lt. dmax) then
                 rind = int((dis - dmin) / rwidth + 1)
-                DD(rind) = DD(rind) + 1
-
-                if (has_velocity) then
-                  VV_r(rind) = VV_r(rind) + vr
-                  VV_los(rind) = VV_los(rind) + vlos
-                  VV2_los(rind) = VV2_los(rind) + vlos**2
-                end if
+                muind = int((mu - mumin) / muwidth + 1)
+                DD(i, rind, muind) = DD(i, rind, muind) + 1
               end if
+
   
               if(ii.eq.lirst(ix2,iy2,iz2)) exit
   
@@ -240,30 +233,26 @@ program density_profiles
         end do
       end do
     end do
-  end do
 
-  do i = 1, nrbin
-    vol = 4./3 * pi * (rbin_edges(i + 1) ** 3 - rbin_edges(i) ** 3)
-    delta(i) = DD(i) / (vol * rhomed * nc) - 1
-
-    if (has_velocity) then
-      mean_vr(i) = VV_r(i) / DD(i)
-      std_vlos(i) = sqrt((VV2_los(i) - (VV_los(i) ** 2 / DD(i))) / (DD(i) - 1))
-    end if
-
+    do ii = 1, nrbin
+      do jj = 1, nmubin
+        vol = 4./3 * pi * (rbin_edges(ii+1)**3 - rbin_edges(ii)**3) / (nmubin)
+        delta(i, ii, jj) = DD(i, ii, jj) / (vol * rhomed) - 1
+      end do
+    end do
   end do
   
   write(*,*) ''
   write(*,*) 'Calculation finished. Writing output...'
   
-  open(12, file=output_den, status='replace')
-  do i = 1, nrbin
-    if (has_velocity) then
-      write(12, fmt='(4f10.5)') rbin(i), delta(i), mean_vr(i), std_vlos(i)
-    else
-      write(12, fmt='(2f10.5)') rbin(i), delta(i)
-    end if
-  end do
+  open(12, file=output_den, status='replace', form='unformatted')
+
+  write(12) nc
+  write(12) size(rbin)
+  write(12) size(mubin)
+  write(12) rbin
+  write(12) mubin
+  write(12) delta
 
   end program density_profiles
   
