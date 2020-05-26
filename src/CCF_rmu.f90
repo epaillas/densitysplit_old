@@ -9,7 +9,7 @@ program density_profiles
   real*8 :: pi = 4.*atan(1.)
   
   integer*8 :: ng, nc, nrbin, rind, nmubin, muind
-  integer*8 :: i, ii, jj, ix, iy, iz, ix2, iy2, iz2
+  integer*8 :: i, j, ii, ix, iy, iz, ix2, iy2, iz2
   integer*8 :: indx, indy, indz, nrows, ncols
   integer*8 :: ipx, ipy, ipz, ndif
   integer*8 :: ngrid
@@ -19,7 +19,7 @@ program density_profiles
   
   real*8, dimension(3) :: r, com
   real*8, allocatable, dimension(:,:)  :: tracers, centres
-  real*8, dimension(:, :, :), allocatable :: DD, cum_DD, delta, cum_delta
+  real*8, dimension(:, :), allocatable :: DD, delta
   real*8, dimension(:), allocatable :: rbin, rbin_edges, mubin, mubin_edges
 
   logical :: has_velocity = .false.
@@ -101,10 +101,8 @@ program density_profiles
   allocate(mubin(nmubin))
   allocate(rbin_edges(nrbin + 1))
   allocate(mubin_edges(nmubin + 1))
-  allocate(DD(nc, nrbin, nmubin))
-  allocate(cum_DD(nc, nrbin, nmubin))
-  allocate(delta(nc, nrbin, nmubin))
-  allocate(cum_delta(nc, nrbin, nmubin))
+  allocate(DD(nrbin, nmubin))
+  allocate(delta(nrbin, nmubin))
   
   
   rwidth = (dmax - dmin) / nrbin
@@ -169,9 +167,7 @@ program density_profiles
   write(*,*) 'Starting loop over centres...'
   
   DD = 0
-  cum_DD = 0
   delta = 0
-  cum_delta = 0
   
   do i = 1, nc
     xvc = centres(1, i)
@@ -222,7 +218,7 @@ program density_profiles
               if (dis .gt. dmin .and. dis .lt. dmax) then
                 rind = int((dis - dmin) / rwidth + 1)
                 muind = int((mu - mumin) / muwidth + 1)
-                DD(i, rind, muind) = DD(i, rind, muind) + 1
+                DD(rind, muind) = DD(rind, muind) + 1
               end if
 
   
@@ -233,26 +229,24 @@ program density_profiles
         end do
       end do
     end do
+  end do
 
-    do ii = 1, nrbin
-      do jj = 1, nmubin
-        vol = 4./3 * pi * (rbin_edges(ii+1)**3 - rbin_edges(ii)**3) / (nmubin)
-        delta(i, ii, jj) = DD(i, ii, jj) / (vol * rhomed) - 1
-      end do
+  do i = 1, nrbin
+    do j = 1, nmubin
+      vol = 4./3 * pi * (rbin_edges(i+1)**3 - rbin_edges(i)**3) / (nmubin)
+      delta(i, j) = DD(i, j) / (vol * rhomed * nc) - 1
     end do
   end do
   
   write(*,*) ''
   write(*,*) 'Calculation finished. Writing output...'
   
-  open(12, file=output_den, status='replace', form='unformatted')
-
-  write(12) nc
-  write(12) size(rbin)
-  write(12) size(mubin)
-  write(12) rbin
-  write(12) mubin
-  write(12) delta
+  open(12, file=output_den, status='replace')
+  do j = 1, nmubin
+    do i = 1, nrbin
+      write(12, fmt='(3f10.5)') rbin(i), mubin(j), delta(i, j)
+    end do
+  end do
 
   end program density_profiles
   
