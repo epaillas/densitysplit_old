@@ -259,9 +259,9 @@ program density_profiles
   open(12, file=output_den, status='replace')
   do i = 1, nrbin
     if (has_velocity) then
-      write(12, fmt='(4f10.5)') rbin(i), delta(i), mean_vr(i), std_vlos(i)
+      write(12, fmt='(4f15.5)') rbin(i), delta(i), mean_vr(i), std_vlos(i)
     else
-      write(12, fmt='(2f10.5)') rbin(i), delta(i)
+      write(12, fmt='(2f15.5)') rbin(i), delta(i)
     end if
   end do
 

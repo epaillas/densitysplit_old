@@ -244,7 +244,7 @@ program density_profiles
   open(12, file=output_den, status='replace')
   do j = 1, nmubin
     do i = 1, nrbin
-      write(12, fmt='(3f10.5)') rbin(i), mubin(j), delta(i, j)
+      write(12, fmt='(3f15.5)') rbin(i), mubin(j), delta(i, j)
     end do
   end do
 
