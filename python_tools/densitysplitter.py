@@ -109,10 +109,10 @@ class DensitySplitter:
         the random centres.
         '''
         if self.is_matter:
-            fout = self.handle + '.CCF_DM_monopole.unf'
+            fout = self.handle + '.CCF_DM_monopole'
             logfile = self.handle + '.CCF_DM_monopole.log'
         else:
-            fout = self.handle + '.CCF_gal_monopole.unf'
+            fout = self.handle + '.CCF_gal_monopole'
             logfile = self.handle + '.CCF_gal_monopole.log'
 
         if self.is_box:
@@ -191,10 +191,10 @@ class DensitySplitter:
         the random centres.
         '''
         if self.is_matter:
-            fout = self.handle + '.CCF_DM_rmu.unf'
+            fout = self.handle + '.CCF_DM_rmu'
             logfile = self.handle + '.CCF_DM_rmu.log'
         else:
-            fout = self.handle + '.CCF_gal_rmu.unf'
+            fout = self.handle + '.CCF_gal_rmu'
             logfile = self.handle + '.CCF_gal_rmu.log'
 
         if self.is_box:
