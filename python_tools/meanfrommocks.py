@@ -22,7 +22,7 @@ def mean_from_mocks(handle_in,
 
     # possible file extensions
     if corr_type == 'monopole':
-        file_ext = ['CCF_gal_monopole', 'CCF_DM_monopole']
+        file_ext = ['CCF_gal_xi_r', 'CCF_DM_delta']
     elif corr_type =='rmu':
         file_ext = ['CCF_gal_rmu']
     elif corr_type == 'spi':
@@ -31,7 +31,7 @@ def mean_from_mocks(handle_in,
         sys.exit('Correlation type not recognized.')
 
     if is_velocity:
-        file_ext = ['CCF_gal_vr', 'CCF_gal_svlos']
+        file_ext = ['CCF_gal_v_r', 'CCF_gal_sv_los']
 
     # loop over all mocks and calculate mean
     for ext in file_ext:
