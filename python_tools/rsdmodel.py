@@ -79,14 +79,15 @@ class SingleFit:
         data = np.genfromtxt(self.delta_r_file)
         self.r_for_delta = data[:,0]
         delta_r = data[:,-2]
-        self.delta_r = InterpolatedUnivariateSpline(self.r_for_delta, delta_r, k=3, ext=3)
+        self.delta_r = InterpolatedUnivariateSpline(self.r_for_delta, delta_r, k=3, ext=2)
 
         integral = np.zeros_like(self.r_for_delta)
         for i in range(len(integral)):
+            print(self.delta_r(self.r_for_delta[i]))
             integral[i] = quad(lambda x: self.delta_r(x) * x ** 2, 0, self.r_for_delta[i], full_output=1)[0]
         Delta_r = 3 * integral / self.r_for_delta ** 3
         self.Delta_r = InterpolatedUnivariateSpline(self.r_for_delta, Delta_r, k=3, ext=3)
-
+        sys.exit()
         if self.model == 1 or self.model == 3 or self.model == 4:
             # read los velocity dispersion profile
             data = np.genfromtxt(self.sv_file)
@@ -96,7 +97,7 @@ class SingleFit:
             else:
                 self.sv_converge = data[-1, -2]
                 sv = data[:,-2] / self.sv_converge
-                sv = savgol_filter(sv, 3, 1)
+                #sv = savgol_filter(sv, 3, 1)
             self.sv = InterpolatedUnivariateSpline(self.r_for_sv, sv, k=3, ext=3)
 
         if self.model == 3 or self.model == 4:
@@ -257,7 +258,7 @@ class SingleFit:
 
             yaxis = mufunc(xaxis) * 5 / 2 * (3 * xaxis**2 - 1) / 2
             quadrupole[i] = simps(yaxis, xaxis)
-            
+
             
         return monopole, quadrupole
 

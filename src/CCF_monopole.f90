@@ -1,7 +1,7 @@
 program density_profiles
   implicit none
   
-  real*8 :: rgrid, boxsize, vol, rhomed
+  real*8 :: rgrid, boxsize, vol, int_vol, rhomed
   real*8 :: disx, disy, disz, dis, vr, vlos
   real*8 :: xvc, yvc, zvc
   real*8 :: velx, vely, velz
@@ -19,7 +19,7 @@ program density_profiles
   
   real*8, dimension(3) :: r, vel, com
   real*8, allocatable, dimension(:,:)  :: tracers, centres
-  real*8, dimension(:), allocatable :: DD, delta
+  real*8, dimension(:), allocatable :: DD, int_DD, delta, int_delta
   real*8, dimension(:), allocatable :: VV_r, VV_los, VV2_los, mean_vr, std_vlos
   real*8, dimension(:), allocatable :: rbin, rbin_edges
 
@@ -98,7 +98,9 @@ program density_profiles
   allocate(rbin(nrbin))
   allocate(rbin_edges(nrbin + 1))
   allocate(DD(nrbin))
+  allocate(int_DD(nrbin))
   allocate(delta(nrbin))
+  allocate(int_delta(nrbin))
   if (has_velocity) then
     allocate(VV_r(nrbin))
     allocate(VV_los(nrbin))
@@ -159,7 +161,9 @@ program density_profiles
   write(*,*) 'Starting loop over centres...'
   
   DD = 0
+  int_DD = 0
   delta = 0
+  int_DD = 0
   if (has_velocity) then
     VV_r = 0
     VV_los = 0
@@ -242,9 +246,16 @@ program density_profiles
     end do
   end do
 
+  int_DD(1) = DD(1)
+  do i = 2, nrbin
+    int_DD(i) =  int_DD(i - 1) + DD(i)
+  end do
+
   do i = 1, nrbin
     vol = 4./3 * pi * (rbin_edges(i + 1) ** 3 - rbin_edges(i) ** 3)
+    int_vol = 4./3 * pi * rbin_edges(i + 1) ** 3
     delta(i) = DD(i) / (vol * rhomed * nc) - 1
+    int_delta(i) = int_DD(i) / (int_vol * rhomed * nc) - 1
 
     if (has_velocity) then
       mean_vr(i) = VV_r(i) / DD(i)
@@ -259,9 +270,9 @@ program density_profiles
   open(12, file=output_den, status='replace')
   do i = 1, nrbin
     if (has_velocity) then
-      write(12, fmt='(4f15.5)') rbin(i), delta(i), mean_vr(i), std_vlos(i)
+      write(12, fmt='(4f15.5)') rbin(i), delta(i), int_delta(i), mean_vr(i), std_vlos(i)
     else
-      write(12, fmt='(2f15.5)') rbin(i), delta(i)
+      write(12, fmt='(2f15.5)') rbin(i), delta(i), int_delta(i)
     end if
   end do
 
