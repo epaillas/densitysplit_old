@@ -28,9 +28,20 @@ fout = args.handle + ext_out
 cout = np.c_[r_for_xi, delta]
 np.savetxt(fout, cout, fmt=fmt)
 
+# integrated xi_r
+r_for_xi = data[:,0]
+int_delta = data[:,2]
+if args.is_matter:
+    ext_out = '.DM_int_delta_r'
+else:
+    ext_out = '.gal_int_xi_r'
+fout = args.handle + ext_out
+cout = np.c_[r_for_xi, int_delta]
+np.savetxt(fout, cout, fmt=fmt)
+
 # v_r
 r_for_v = data[:,0]
-v_r = data[:,2]
+v_r = data[:,3]
 if args.is_matter:
     ext_out = '.DM_v_r'
 else:
@@ -41,7 +52,7 @@ np.savetxt(fout, cout, fmt=fmt)
 
 # sv_los
 r_for_v = data[:,0]
-sv_los = data[:,3]
+sv_los = data[:,4]
 if args.is_matter:
     ext_out = '.DM_sv_los'
 else:

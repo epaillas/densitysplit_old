@@ -79,15 +79,14 @@ class SingleFit:
         data = np.genfromtxt(self.delta_r_file)
         self.r_for_delta = data[:,0]
         delta_r = data[:,-2]
-        self.delta_r = InterpolatedUnivariateSpline(self.r_for_delta, delta_r, k=3, ext=2)
+        self.delta_r = InterpolatedUnivariateSpline(self.r_for_delta, delta_r, k=3, ext=3)
 
         integral = np.zeros_like(self.r_for_delta)
         for i in range(len(integral)):
-            print(self.delta_r(self.r_for_delta[i]))
             integral[i] = quad(lambda x: self.delta_r(x) * x ** 2, 0, self.r_for_delta[i], full_output=1)[0]
         Delta_r = 3 * integral / self.r_for_delta ** 3
         self.Delta_r = InterpolatedUnivariateSpline(self.r_for_delta, Delta_r, k=3, ext=3)
-        sys.exit()
+        
         if self.model == 1 or self.model == 3 or self.model == 4:
             # read los velocity dispersion profile
             data = np.genfromtxt(self.sv_file)
