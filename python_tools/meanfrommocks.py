@@ -22,7 +22,7 @@ def mean_from_mocks(handle_in,
 
     # possible file extensions
     if corr_type == 'monopole':
-        file_ext = ['gal_xi_r', 'DM_delta_r']
+        file_ext = ['gal_xi_r', 'gal_int_xi_r', 'DM_delta_r', 'DM_int_delta_r']
     elif corr_type =='rmu':
         file_ext = ['CCF_gal_rmu']
     elif corr_type == 'spi':
