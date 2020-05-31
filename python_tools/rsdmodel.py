@@ -11,6 +11,7 @@ from scipy.signal import savgol_filter
 class SingleFit:
     def __init__(self,
                  delta_r_file,
+                 int_delta_r_file,
                  xi_r_file,
                  xi_smu_file,
                  covmat_file,
@@ -24,6 +25,7 @@ class SingleFit:
                  model_as_truth=0):
 
         self.delta_r_file = delta_r_file
+        self.int_delta_r_file = int_delta_r_file
         self.xi_r_file = xi_r_file
         self.sv_file = sv_file
         self.vr_file = vr_file
@@ -81,12 +83,18 @@ class SingleFit:
         delta_r = data[:,-2]
         self.delta_r = InterpolatedUnivariateSpline(self.r_for_delta, delta_r, k=3, ext=3)
 
-        integral = np.zeros_like(self.r_for_delta)
-        for i in range(len(integral)):
-            integral[i] = quad(lambda x: self.delta_r(x) * x ** 2, 0, self.r_for_delta[i], full_output=1)[0]
-        Delta_r = 3 * integral / self.r_for_delta ** 3
+        # read void-matter correlation function
+        data = np.genfromtxt(self.int_delta_r_file)
+        self.r_for_delta = data[:,0]
+        Delta_r = data[:,-2]
         self.Delta_r = InterpolatedUnivariateSpline(self.r_for_delta, Delta_r, k=3, ext=3)
-        
+
+        # integral = np.zeros_like(self.r_for_delta)
+        # for i in range(len(integral)):
+        #     integral[i] = quad(lambda x: self.delta_r(x) * x ** 2, 0, self.r_for_delta[i], full_output=1)[0]
+        # Delta_r = 3 * integral / self.r_for_delta ** 3
+        # self.Delta_r = InterpolatedUnivariateSpline(self.r_for_delta, Delta_r, k=3, ext=3)
+
         if self.model == 1 or self.model == 3 or self.model == 4:
             # read los velocity dispersion profile
             data = np.genfromtxt(self.sv_file)
@@ -96,7 +104,7 @@ class SingleFit:
             else:
                 self.sv_converge = data[-1, -2]
                 sv = data[:,-2] / self.sv_converge
-                #sv = savgol_filter(sv, 3, 1)
+                sv = savgol_filter(sv, 3, 1)
             self.sv = InterpolatedUnivariateSpline(self.r_for_sv, sv, k=3, ext=3)
 
         if self.model == 3 or self.model == 4:
@@ -203,7 +211,7 @@ class SingleFit:
         scaled_fs8 = fs8 / self.s8norm
 
         # rescale input monopole functions to account for alpha values
-        mus = np.linspace(0, 1., 51)
+        mus = np.linspace(0, 1., 100)
         r = self.r_for_delta
         rescaled_r = np.zeros_like(r)
         for i in range(len(r)):
@@ -439,7 +447,7 @@ class SingleFit:
         dvpec = np.gradient(vpec, self.r_for_delta)
 
         f = 0.7596841096514576
-        delta_c = 10#1.686
+        delta_c = 5#1.686
         vpec = -1/3 * self.r_for_delta * a[-1] * f * H * delta_c * ((1 + self.Delta_r(self.r_for_delta))**(1/delta_c) - 1)
         dvpec = np.gradient(vpec, self.r_for_delta)
 

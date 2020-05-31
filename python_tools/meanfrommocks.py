@@ -31,7 +31,7 @@ def mean_from_mocks(handle_in,
         sys.exit('Correlation type not recognized.')
 
     if is_velocity:
-        file_ext = ['gal_v_r', 'gal_sv_los']
+        file_ext = ['gal_v_r', 'gal_sv_los', 'DM_v_r', 'DM_sv_los']
 
     # loop over all mocks and calculate mean
     for ext in file_ext:
