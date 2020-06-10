@@ -30,7 +30,7 @@ class DensitySplitter:
         self.dmin = dmin
         self.dmax = dmax
         self.nrbins = nrbins
-        self.nmubins = 80
+        self.nmubins = 100
         self.ngrid = ngrid
         self.filter_size = filter_size
         self.filter_type = filter_type

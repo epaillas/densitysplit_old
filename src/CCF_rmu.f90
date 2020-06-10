@@ -113,7 +113,7 @@ program density_profiles
     rbin(i) = rbin_edges(i+1)-rwidth/2.
   end do
 
-  mumin = -1
+  mumin = 0
   mumax = 1
 
   muwidth = (mumax - mumin) / nmubin
@@ -213,7 +213,7 @@ program density_profiles
               r = (/ disx, disy, disz /)
               com = (/ 0, 0, 1 /)
               dis = norm2(r)
-              mu = dot_product(r, com) / (norm2(r) * norm2(com))
+              mu = abs(dot_product(r, com)) / (norm2(r) * norm2(com))
 
               if (dis .gt. dmin .and. dis .lt. dmax) then
                 rind = int((dis - dmin) / rwidth + 1)

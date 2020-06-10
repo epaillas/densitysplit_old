@@ -63,6 +63,7 @@ class SingleFit:
         eofz = np.sqrt((self.om_m * (1 + self.eff_z) ** 3 + 1 - self.om_m))
         self.iaH = (1 + self.eff_z) / (100. * eofz) 
 
+
         # read covariance matrix
         if os.path.isfile(self.covmat_file):
             print('Reading covariance matrix: ' + self.covmat_file)
@@ -95,15 +96,17 @@ class SingleFit:
         # Delta_r = 3 * integral / self.r_for_delta ** 3
         # self.Delta_r = InterpolatedUnivariateSpline(self.r_for_delta, Delta_r, k=3, ext=3)
 
+
         if self.model == 1 or self.model == 3 or self.model == 4:
             # read los velocity dispersion profile
             data = np.genfromtxt(self.sv_file)
             self.r_for_sv = data[:,0]
+            sv = data[:,-2]
             if self.const_sv:
                 sv = np.ones(len(self.r_for_sv))
             else:
-                self.sv_converge = data[-1, -2]
-                sv = data[:,-2] / self.sv_converge
+                self.sv_converge = sv[-1]
+                sv = sv / self.sv_converge
                 sv = savgol_filter(sv, 3, 1)
             self.sv = InterpolatedUnivariateSpline(self.r_for_sv, sv, k=3, ext=3)
 
@@ -139,13 +142,14 @@ class SingleFit:
             s, self.xi0_s = getMonopole(self.s_for_xi, self.mu_for_xi, xi_smu_obs)
             s, self.xi2_s = getQuadrupole(self.s_for_xi, self.mu_for_xi, xi_smu_obs)
 
+
         # restrict measured vectors to the desired fitting scales
         idx = (self.s_for_xi >= self.smin) & (self.s_for_xi <= self.smax)
 
+        #self.r_for_delta = self.r_for_delta[idx]
+        #self.r_for_sv = self.r_for_sv[idx]
+        #self.r_for_vr = self.r_for_vr[idx]
         self.s_for_xi = self.s_for_xi[idx]
-        self.r_for_xi = self.r_for_xi[idx]
-        self.r_for_delta = self.r_for_delta[idx]
-        self.r_for_sv = self.r_for_sv[idx]
         self.xi0_s = self.xi0_s[idx]
         self.xi2_s = self.xi2_s[idx]
 
@@ -211,7 +215,7 @@ class SingleFit:
         scaled_fs8 = fs8 / self.s8norm
 
         # rescale input monopole functions to account for alpha values
-        mus = np.linspace(0, 1., 100)
+        mus = np.linspace(0, 1., 80)
         r = self.r_for_delta
         rescaled_r = np.zeros_like(r)
         for i in range(len(r)):
@@ -225,7 +229,7 @@ class SingleFit:
         y4 = self.sv(r)
 
         # build rescaled interpolating functions using the relabelled separation vectors
-        rescaled_xi_r = InterpolatedUnivariateSpline(x, y1, k=3)
+        rescaled_xi_r = InterpolatedUnivariateSpline(x, y1, k=3, ext=3)
         rescaled_delta_r = InterpolatedUnivariateSpline(x, y2, k=3, ext=3)
         rescaled_Delta_r = InterpolatedUnivariateSpline(x, y3, k=3, ext=3)
         rescaled_sv = InterpolatedUnivariateSpline(x, y4, k=3, ext=3)
@@ -264,7 +268,7 @@ class SingleFit:
             monopole[i] = simps(yaxis, xaxis)
 
             yaxis = mufunc(xaxis) * 5 / 2 * (3 * xaxis**2 - 1) / 2
-            quadrupole[i] = simps(yaxis, xaxis)
+            quadrupole[i] = np.trapz(yaxis, xaxis)
 
             
         return monopole, quadrupole
@@ -291,7 +295,7 @@ class SingleFit:
         y3 = self.Delta_r(r)
 
         # build rescaled interpolating functions using the relabelled separation vectors
-        rescaled_xi_r = InterpolatedUnivariateSpline(x, y1, k=3)
+        rescaled_xi_r = InterpolatedUnivariateSpline(x, y1, k=3, ext=3)
         rescaled_delta_r = InterpolatedUnivariateSpline(x, y2, k=3, ext=3)
         rescaled_Delta_r = InterpolatedUnivariateSpline(x, y3, k=3, ext=3)
 
@@ -348,7 +352,7 @@ class SingleFit:
         y6 = self.sv(r)
 
         # build rescaled interpolating functions using the relabelled separation vectors
-        rescaled_xi_r = InterpolatedUnivariateSpline(x, y1, k=3)
+        rescaled_xi_r = InterpolatedUnivariateSpline(x, y1, k=3, ext=3)
         rescaled_vr = InterpolatedUnivariateSpline(x, y4, k=3, ext=3)
         rescaled_dvr = InterpolatedUnivariateSpline(x, y5, k=3, ext=3)
         rescaled_sv = InterpolatedUnivariateSpline(x, y6, k=3, ext=3)
@@ -435,31 +439,36 @@ class SingleFit:
             sol1.append(y[-1]**-3 - 1)
             sol2.append(yprime[-1])
 
-        interp_den = InterpolatedUnivariateSpline(sol1, delta_lin, k=3)
-        interp_vel = InterpolatedUnivariateSpline(delta_lin, sol2, k=3)
+        interp_den = InterpolatedUnivariateSpline(sol1, delta_lin, k=3, ext=3)
+        interp_vel = InterpolatedUnivariateSpline(delta_lin, sol2, k=3, ext=3)
 
-        matched_dls = interp_den(self.Delta_r(self.r_for_delta))
+
+        rwidth = np.diff(self.r_for_delta)[0]
+        xaxis = np.linspace(0, 150, len(self.r_for_delta) + 1)[1:]
+        xaxis = self.r_for_delta
+
+        matched_dls = interp_den(self.Delta_r(xaxis))
         matched_vpecs = interp_vel(matched_dls)
 
         H = Hubble(a=a[-1], om_m0=om_m0, om_l0=om_l0)
-        q = self.r_for_delta * a[-1] * (1 + self.Delta_r(self.r_for_delta))**(1/3) 
+        q = xaxis * a[-1] * (1 + self.Delta_r(xaxis))**(1/3) 
         vpec = matched_vpecs * H * q
-        dvpec = np.gradient(vpec, self.r_for_delta)
+        dvpec = np.gradient(vpec, xaxis)
 
         f = 0.7596841096514576
-        delta_c = 5#1.686
-        vpec = -1/3 * self.r_for_delta * a[-1] * f * H * delta_c * ((1 + self.Delta_r(self.r_for_delta))**(1/delta_c) - 1)
-        dvpec = np.gradient(vpec, self.r_for_delta)
+        delta_c = 5
+        vpec = -1/3 * xaxis * a[-1] * f * H * delta_c * ((1 + self.Delta_r(xaxis))**(1/delta_c) - 1)
+        dvpec = np.gradient(vpec, xaxis)
 
-        self.vr = InterpolatedUnivariateSpline(self.r_for_delta, vpec, k=3)
-        self.dvr = InterpolatedUnivariateSpline(self.r_for_delta, dvpec, k=3)
+        self.vr = InterpolatedUnivariateSpline(self.r_for_delta, vpec, k=3, ext=3)
+        self.dvr = InterpolatedUnivariateSpline(self.r_for_delta, dvpec, k=3, ext=3)
 
-        #ax.plot(self.r_for_delta, self.vr(self.r_for_delta), label='solve ode')
-        #plt.show()
-        #sys.exit()
+        # ax.plot(self.r_for_delta, self.vr(self.r_for_delta), label='solve ode')
+        # plt.show()
+        # sys.exit()
 
         # rescale input monopole functions to account for alpha values
-        mus = np.linspace(0, 1., 100)
+        mus = np.linspace(0, 1., 80)
         r = self.r_for_delta
         rescaled_r = np.zeros_like(r)
         for i in range(len(r)):
@@ -473,7 +482,7 @@ class SingleFit:
         y6 = self.sv(r)
 
         # build rescaled interpolating functions using the relabelled separation vectors
-        rescaled_xi_r = InterpolatedUnivariateSpline(x, y1, k=3)
+        rescaled_xi_r = InterpolatedUnivariateSpline(x, y1, k=3, ext=3)
         rescaled_vr = InterpolatedUnivariateSpline(x, y4, k=3, ext=3)
         rescaled_dvr = InterpolatedUnivariateSpline(x, y5, k=3, ext=3)
         rescaled_sv = InterpolatedUnivariateSpline(x, y6, k=3, ext=3)
@@ -522,10 +531,10 @@ class SingleFit:
             xaxis = np.linspace(-1, 1, 1000)
 
             yaxis = mufunc(xaxis) / 2
-            monopole[i] = simps(yaxis, xaxis)
+            monopole[i] = np.trapz(yaxis, xaxis)
 
             yaxis = mufunc(xaxis) * 5 / 2 * (3 * xaxis**2 - 1) / 2
-            quadrupole[i] = simps(yaxis, xaxis)
+            quadrupole[i] = np.trapz(yaxis, xaxis)
             
             
         return monopole, quadrupole
@@ -886,5 +895,29 @@ def CosmologicalTime(zi, zf):
 
 def Hubble(a, om_m0, om_l0):
     return 100 * np.sqrt(om_m0 * a ** -3 + om_l0)
+
+def truncate_covmat(input_cm, k):
+        """
+        Method to truncate composite covariance matrix for multipole data vector (monopole and quadrupole), to keep
+        only the first k indices in each
+        :param input_cm: numpy array, input covariance matrix to resize
+        :param k: integer, largest index to keep
+        :return: the truncated covariance matrix
+        """
+
+        bin_range = input_cm.shape[0] / 2
+        output_cm = np.zeros((2 * k, 2 * k))
+        for i in range(input_cm.shape[0]):
+            for j in range(input_cm.shape[0]):
+                if i < k and j < k:
+                    output_cm[i, j] = input_cm[i, j]
+                elif bin_range <= i < bin_range + k and j < k:
+                    output_cm[i + k - bin_range, j] = input_cm[i, j]
+                elif i < k and bin_range <= j < bin_range + k:
+                    output_cm[i, j + k - bin_range] = input_cm[i, j]
+                elif bin_range <= i < bin_range + k and bin_range <= j < bin_range + k:
+                    output_cm[i + k - bin_range, j + k - bin_range] = input_cm[i, j]
+
+        return output_cm
 
 
