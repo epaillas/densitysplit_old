@@ -53,7 +53,6 @@ class DensitySplitter:
         print('handle: {}'.format(self.handle))
         print('tracer_file: {}'.format(self.tracer_file))
         print('centres_file: {}'.format(self.centres_file))
-        print('is_matter: {}'.format(self.is_matter))
         print('nrandoms: {}'.format(self.nrandoms))
 
         if os.path.isfile(self.centres_file):
