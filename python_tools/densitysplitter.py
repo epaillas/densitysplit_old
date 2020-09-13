@@ -34,14 +34,11 @@ class DensitySplitter:
         self.tracer_file = tracer_file
         self.centres_file = centres_file
 
-        self.get_monopole = get_monopole
-        self.get_rmu = get_rmu
-        self.get_spi = get_spi
         self.get_filter = get_filter
-        self.is_matter = is_matter
-        self.is_box = is_box
         self.nrandoms = int(nrandoms)
-        self.boxsize = boxsize
+        self.boxsize_x = boxsize_x
+        self.boxsize_y = boxsize_y
+        self.boxsize_z = boxsize_z
         self.dmin = dmin
         self.dmax = dmax
         self.ngrid_x = ngrid_x
