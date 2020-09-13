@@ -32,7 +32,7 @@ program density_profiles
     character(len=10) :: ngridchar_x, ngridchar_y, ngridchar_z
     character(len=10) :: qperp_char, qpara_char
     
-    if (iargc() .ne. 12) then
+    if (iargc() .lt. 12) then
         write(*,*) 'Some arguments are missing.'
         write(*,*) '1) input_data'
         write(*,*) '2) input_centres'
