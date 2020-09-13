@@ -19,7 +19,6 @@ class DensitySplitter:
                  boxsize_z,
                  dmin,
                  dmax,
-                 is_box=True,
                  ngrid_x,
                  ngrid_y,
                  ngrid_z,
@@ -27,8 +26,8 @@ class DensitySplitter:
                  filter_type='tophat',
                  filter_size=20,
                  randoms_from_tracers=False,
-                 qperp,
-                 qpara):
+                 qperp=1.0,
+                 qpara=1.0):
 
         # file names
         self.handle = handle
@@ -111,23 +110,22 @@ class DensitySplitter:
         fout = self.handle + '.gal_GaussianDelta.unf'
         logfile = self.handle + '.gal_GaussianDelta.log'
 
-        if self.is_box:
-            binpath = sys.path[0] + '/bin/'
-            cmd = [binpath + 'gaussian_filter.exe',
-                   self.tracer_file,
-                   self.centres_file,
-                   fout,
-                   str(self.boxsize_x),
-                   str(self.boxsize_y),
-                   str(self.boxsize_z)
-                   str(self.dmin),
-                   str(self.dmax),
-                   str(self.filter_size),
-                   str(self.ngrid_x),
-                   str(self.ngrid_y)
-                   str(self.ngrid_z),
-                   str(self.qperp),
-                   str(self.qpara)]
+        binpath = sys.path[0] + '/bin/'
+        cmd = [binpath + 'gaussian_filter.exe',
+               self.tracer_file,
+               self.centres_file,
+               fout,
+               str(self.boxsize_x),
+               str(self.boxsize_y),
+               str(self.boxsize_z),
+               str(self.dmin),
+               str(self.dmax),
+               str(self.filter_size),
+               str(self.ngrid_x),
+               str(self.ngrid_y),
+               str(self.ngrid_z),
+               str(self.qperp),
+               str(self.qpara)]
 
         log = open(logfile, "w+")
         subprocess.call(cmd, stdout=log, stderr=log)
@@ -141,23 +139,22 @@ class DensitySplitter:
         fout = self.handle + '.gal_TopHatDelta.unf'
         logfile = self.handle + '.gal_TopHatDelta.log'
 
-        if self.is_box:
-            binpath = sys.path[0] + '/bin/'
-            cmd = [binpath + 'tophat_filter.exe',
-                   self.tracer_file,
-                   self.centres_file,
-                   fout,
-                   str(self.boxsize_x),
-                   str(self.boxsize_y),
-                   str(self.boxsize_z)
-                   str(self.dmin),
-                   str(self.dmax),
-                   str(self.filter_size),
-                   str(self.ngrid_x),
-                   str(self.ngrid_y)
-                   str(self.ngrid_z),
-                   str(self.qperp),
-                   str(self.qpara)]
+        binpath = sys.path[0] + '/bin/'
+        cmd = [binpath + 'tophat_filter.exe',
+               self.tracer_file,
+               self.centres_file,
+               fout,
+               str(self.boxsize_x),
+               str(self.boxsize_y),
+               str(self.boxsize_z),
+               str(self.dmin),
+               str(self.dmax),
+               str(self.filter_size),
+               str(self.ngrid_x),
+               str(self.ngrid_y),
+               str(self.ngrid_z),
+               str(self.qperp),
+               str(self.qpara)]
 
         log = open(logfile, "w+")
         subprocess.call(cmd, stdout=log, stderr=log)
