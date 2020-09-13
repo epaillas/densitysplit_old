@@ -6,13 +6,29 @@ import subprocess
 from astropy.io import fits
 from scipy.io import FortranFile
 
+
 class DensitySplitter:
 
-    def __init__(self, handle, tracer_file, centres_file, nrandoms, box_size,
-                 dmin, dmax, nrbins, is_box=True, ngrid=100, is_matter=False,
-                 get_monopole=True, get_rmu=False, get_spi=True,
-                 get_filter=True, filter_type='tophat', 
-                 filter_size=20, randoms_from_gal=False):
+    def __init__(self,
+                 handle,
+                 tracer_file,
+                 centres_file,
+                 nrandoms,
+                 boxsize_x,
+                 boxsize_y,
+                 boxsize_z,
+                 dmin,
+                 dmax,
+                 is_box=True,
+                 ngrid_x,
+                 ngrid_y,
+                 ngrid_z,
+                 get_filter=True,
+                 filter_type='tophat',
+                 filter_size=20,
+                 randoms_from_tracers=False,
+                 qperp,
+                 qpara):
 
         # file names
         self.handle = handle
@@ -26,15 +42,17 @@ class DensitySplitter:
         self.is_matter = is_matter
         self.is_box = is_box
         self.nrandoms = int(nrandoms)
-        self.box_size = box_size
+        self.boxsize = boxsize
         self.dmin = dmin
         self.dmax = dmax
-        self.nrbins = nrbins
-        self.nmubins = 100
-        self.ngrid = ngrid
+        self.ngrid_x = ngrid_x
+        self.ngrid_y = ngrid_y
+        self.ngrid_z = ngrid_z
         self.filter_size = filter_size
         self.filter_type = filter_type
-        self.randoms_from_gal = randoms_from_gal
+        self.randoms_from_tracers = randoms_from_tracers
+        self.qperp = qperp
+        self.qpara = qpara
 
         print('handle: {}'.format(self.handle))
         print('tracer_file: {}'.format(self.tracer_file))
@@ -45,30 +63,12 @@ class DensitySplitter:
         if os.path.isfile(self.centres_file):
             print('Centres file found. Skipping random centre generation.')
         else:
-            self.GenerateRandomPoints()
+            self.random_points()
 
-        if self.get_monopole:
-            print('Calculating CCF monopole.')
-            self.CCF_monopole()
-        if self.get_rmu:
-            print('Calculating CCF in r-mu')
-            self.CCF_rmu()
-        if self.get_spi:
-            print('Calculating CCF in sigma-pi')
-            self.CCF_spi()
         if self.get_filter:
-            if self.filter_type == 'gaussian':
-                print('Calculating Gaussian smoothed Delta.')
-                self.gaussian_filter()
-            elif self.filter_type == 'tophat':
-                print('Calculating top-hat Delta.')
-                self.tophat_filter()
-            else:
-                sys.exit('Filter type not recognized. Aborting...')  
+            getattr(self, filter_type + '_filter')()
 
-
-
-    def GenerateRandomPoints(self):
+    def random_points(self):
         '''
         Generates random points on a box
         of length and writes them down
@@ -76,7 +76,7 @@ class DensitySplitter:
         '''
         np.random.seed(0)
 
-        if self.randoms_from_gal:
+        if self.randoms_from_tracers:
             print('Randoms will be generated from galaxy positions.')
             fin = FortranFile(self.tracer_file, 'r')
             nrows = fin.read_ints()[0]
@@ -87,9 +87,9 @@ class DensitySplitter:
 
         else:
             print('Randoms will be generated from a uniform distribution.')
-            x = np.random.uniform(0, self.box_size, self.nrandoms)
-            y = np.random.uniform(0, self.box_size, self.nrandoms)
-            z = np.random.uniform(0, self.box_size, self.nrandoms)
+            x = np.random.uniform(0, self.boxsize_x, self.nrandoms)
+            y = np.random.uniform(0, self.boxsize_y, self.nrandoms)
+            z = np.random.uniform(0, self.boxsize_z, self.nrandoms)
             cout = np.c_[x, y, z]
 
         cout = cout.astype('float64')
@@ -102,45 +102,14 @@ class DensitySplitter:
 
         return
 
-    def CCF_monopole(self):
-        '''
-        Computes delta(r), Delta(r),
-        vel(r), DD(R) profiles from
-        the random centres.
-        '''
-        if self.is_matter:
-            fout = self.handle + '.CCF_DM_monopole'
-            logfile = self.handle + '.CCF_DM_monopole.log'
-        else:
-            fout = self.handle + '.CCF_gal_monopole'
-            logfile = self.handle + '.CCF_gal_monopole.log'
-
-        if self.is_box:
-            binpath = sys.path[0] + '/bin/'
-            cmd = [binpath + 'CCF_monopole.exe',
-                   self.tracer_file,
-                   self.centres_file,
-                   fout,
-                   str(self.box_size),
-                   str(self.dmin),
-                   str(self.dmax),
-                   str(self.nrbins),
-                   str(self.ngrid)]
-        
-        log = open(logfile, "w+")
-        subprocess.call(cmd, stdout=log, stderr=log)
-
     def gaussian_filter(self):
         '''
         Computes Gaussian smoothed Delta
         for a given filter size.
         '''
-        if self.is_matter:
-            fout = self.handle + '.DM_SmoothedDelta.unf'
-            logfile = self.handle + '.DM_SmoothedDelta.log'
-        else:
-            fout = self.handle + '.gal_SmoothedDelta.unf'
-            logfile = self.handle + '.gal_SmoothedDelta.log'
+        print('Calculating filter using Gaussian smoothing.')
+        fout = self.handle + '.gal_GaussianDelta.unf'
+        logfile = self.handle + '.gal_GaussianDelta.log'
 
         if self.is_box:
             binpath = sys.path[0] + '/bin/'
@@ -148,12 +117,18 @@ class DensitySplitter:
                    self.tracer_file,
                    self.centres_file,
                    fout,
-                   str(self.box_size),
+                   str(self.boxsize_x),
+                   str(self.boxsize_y),
+                   str(self.boxsize_z)
                    str(self.dmin),
                    str(self.dmax),
                    str(self.filter_size),
-                   str(self.ngrid)]
-        
+                   str(self.ngrid_x),
+                   str(self.ngrid_y)
+                   str(self.ngrid_z),
+                   str(self.qperp),
+                   str(self.qpara)]
+
         log = open(logfile, "w+")
         subprocess.call(cmd, stdout=log, stderr=log)
 
@@ -162,12 +137,9 @@ class DensitySplitter:
         Computes top-hat Delta
         for a given filter size.
         '''
-        if self.is_matter:
-            fout = self.handle + '.DM_TopHatDelta.unf'
-            logfile = self.handle + '.DM_TopHatDelta.log'
-        else:
-            fout = self.handle + '.gal_TopHatDelta.unf'
-            logfile = self.handle + '.gal_TopHatDelta.log'
+        print('Calculating filter using Top-hat smoothing.')
+        fout = self.handle + '.gal_TopHatDelta.unf'
+        logfile = self.handle + '.gal_TopHatDelta.log'
 
         if self.is_box:
             binpath = sys.path[0] + '/bin/'
@@ -175,68 +147,17 @@ class DensitySplitter:
                    self.tracer_file,
                    self.centres_file,
                    fout,
-                   str(self.box_size),
+                   str(self.boxsize_x),
+                   str(self.boxsize_y),
+                   str(self.boxsize_z)
                    str(self.dmin),
                    str(self.dmax),
                    str(self.filter_size),
-                   str(self.ngrid)]
-        
+                   str(self.ngrid_x),
+                   str(self.ngrid_y)
+                   str(self.ngrid_z),
+                   str(self.qperp),
+                   str(self.qpara)]
+
         log = open(logfile, "w+")
         subprocess.call(cmd, stdout=log, stderr=log)
-
-    def CCF_rmu(self):
-        '''
-        Computes delta(r), Delta(r),
-        DD(R) profiles from
-        the random centres.
-        '''
-        if self.is_matter:
-            fout = self.handle + '.CCF_DM_rmu'
-            logfile = self.handle + '.CCF_DM_rmu.log'
-        else:
-            fout = self.handle + '.CCF_gal_rmu'
-            logfile = self.handle + '.CCF_gal_rmu.log'
-
-        if self.is_box:
-            binpath = sys.path[0] + '/bin/'
-            cmd = [binpath + 'CCF_rmu.exe',
-                   self.tracer_file,
-                   self.centres_file,
-                   fout,
-                   str(self.box_size),
-                   str(self.dmin),
-                   str(self.dmax),
-                   str(self.nrbins),
-                   str(self.nmubins),
-                   str(self.ngrid)]
-        
-        log = open(logfile, "w+")
-        subprocess.call(cmd, stdout=log, stderr=log)
-
-    def CCF_spi(self):
-        '''
-        Computes delta(r) profiles from
-        the random centres in bins of s and pi.
-        '''
-        if self.is_matter:
-            fout = self.handle + '.CCF_DM_spi.unf'
-            logfile = self.handle + '.CCF_DM_spi.log'
-        else:
-            fout = self.handle + '.CCF_gal_spi.unf'
-            logfile = self.handle + '.CCF_gal_spi.log'
-
-        if self.is_box:
-            binpath = sys.path[0] + '/bin/'
-            cmd = [binpath + 'CCF_spi.exe',
-                   self.tracer_file,
-                   self.centres_file,
-                   fout,
-                   str(self.box_size),
-                   str(self.dmin),
-                   str(self.dmax),
-                   str(self.nrbins),
-                   str(self.ngrid)]
-        
-        log = open(logfile, "w+")
-        subprocess.call(cmd, stdout=log, stderr=log)
-
