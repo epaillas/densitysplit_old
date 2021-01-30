@@ -4,14 +4,14 @@ from scipy.io import FortranFile
 import click
 
 @click.command()
-@click.option('--data_filename', type=str, required=True)
 @click.option('--centres_filename', type=str, required=True)
-@click.option('--nrandoms', type=int, required=True)
+@click.option('--npositions', type=int, required=True)
 @click.option('--sampling', type=str, required=True)
 @click.option('--boxsize', type=float, required=True)
+@click.option('--data_filename', type=str)
 def generate_positions(data_filename,
                      centres_filename,
-                     nrandoms,
+                     npositions,
                      sampling,
                      boxsize):
         '''
@@ -27,14 +27,14 @@ def generate_positions(data_filename,
             nrows = fin.read_ints()[0]
             ncols = fin.read_ints()[0]
             pos = fin.read_reals(dtype=np.float64).reshape(nrows, ncols)
-            idx = np.random.choice(nrows, size=nrandoms, replace=False)
+            idx = np.random.choice(nrows, size=npositions, replace=False)
             cout = pos[idx]
 
         elif sampling == 'uniform':
             print('Randoms will be generated from a uniform distribution.')
-            x = np.random.uniform(0, boxsize, nrandoms)
-            y = np.random.uniform(0, boxsize, nrandoms)
-            z = np.random.uniform(0, boxsize, nrandoms)
+            x = np.random.uniform(0, boxsize, npositions)
+            y = np.random.uniform(0, boxsize, npositions)
+            z = np.random.uniform(0, boxsize, npositions)
             cout = np.c_[x, y, z]
         else:
             sys.exit('Sampling type not recognized')
