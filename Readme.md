@@ -11,14 +11,14 @@ Input arguments:
      --sampling: type str, how to sample the random positions; 'uniform' for a uniform disitribution across 
                  the simulation volume, or 'tracers' to randomly sample from tracer positions 
      --boxsize: type float, size of the simulation box
-     --data_filename: type str, optional, name of the file where tracer positions are stored.
+     --data_filename: type str, optional, name of the file where tracer positions are stored. Must be a Fortran 90 unformatted file. To convert from an ASCII text file, use ascii_to_unformatted.py
     
 
 **2) calculate_filter.py**: calculates the integrated galaxy density at a given distance for each random position
 
 Input arguments:
 
-    --data_filename: type str, name of the file where tracer positions are stored
+    --data_filename: type str, name of the file where tracer positions are stored. Must be a Fortran 90 unformatted file. To convert from an ASCII text file, use ascii_to_unformatted.py
     --filter_filename: type str, name of the file where the filtered densities will be stored
     --boxsize: type float, size of the simulation box
     --ngrid: type int, number of cells to divide the simulation box to ease up calculations (100 cells for a 1 Gpc box is a good number)
@@ -37,7 +37,6 @@ Input arguments:
     --centres_filename: type str, name of the file where random positions are stored.
     --filter_file: type str, name of the file where the filtered densities are stored (calculated from calculate_filter.py)
     --quantiles: type int, number of quantiles for the split
-
 
 
 For inquiries, please contact me at epaillas@astro.puc.cl
