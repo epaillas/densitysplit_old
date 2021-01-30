@@ -2,7 +2,7 @@ program density_profiles
     implicit none
     
     real*8 :: rgrid_x, rgrid_y, rgrid_z, vol, rhomed
-    real*8 :: boxsize_x, boxsize_y, boxsize_z
+    real*8 :: boxsize, boxsize_x, boxsize_y, boxsize_z
     real*8 :: disx, disy, disz, dis
     real*8 :: xvc, yvc, zvc
     real*8 :: dmax, dmin, rfilter
@@ -13,7 +13,7 @@ program density_profiles
     integer*8 :: i, ii, ix, iy, iz, ix2, iy2, iz2
     integer*8 :: indx, indy, indz, nrows, ncols
     integer*8 :: ipx, ipy, ipz, ndif_x, ndif_y, ndif_z
-    integer*8 :: ngrid_x, ngrid_y, ngrid_z
+    integer*8 :: ngrid, ngrid_x, ngrid_y, ngrid_z
     integer*4 :: argstat1, argstat2
     
     integer*8, dimension(:, :, :), allocatable :: lirst, nlirst
@@ -28,26 +28,22 @@ program density_profiles
     character(20), external :: str
     character(len=500) :: input_tracers, input_centres, output_den
     character(len=10) :: dmax_char, dmin_char
-    character(len=10) :: boxchar_x, boxchar_y, boxchar_z, rfilter_char
-    character(len=10) :: ngridchar_x, ngridchar_y, ngridchar_z
+    character(len=10) :: boxchar, rfilter_char
+    character(len=10) :: ngridchar
     character(len=10) :: qperp_char, qpara_char
     
-    if (iargc() .lt. 12) then
+    if (iargc() .lt. 10) then
         write(*,*) 'Some arguments are missing.'
         write(*,*) '1) input_data'
         write(*,*) '2) input_centres'
         write(*,*) '3) output_den'
-        write(*,*) '4) boxsize_x'
-        write(*,*) '5) boxsize_y'
-        write(*,*) '6) boxsize_z'
-        write(*,*) '7) dmin'
-        write(*,*) '8) dmax'
-        write(*,*) '9) rfilter'
-        write(*,*) '10) ngrid_x'
-        write(*,*) '11) ngrid_y'
-        write(*,*) '12) ngrid_z'
-        write(*,*) '13) qperp (optional)'
-        write(*,*) '14) qpara (optional)'
+        write(*,*) '4) boxsize'
+        write(*,*) '5) dmin'
+        write(*,*) '6) dmax'
+        write(*,*) '7) rfilter'
+        write(*,*) '8) ngrid'
+        write(*,*) '9) qperp (optional)'
+        write(*,*) '10) qpara (optional)'
         write(*,*) ''
         stop
       end if
@@ -55,27 +51,19 @@ program density_profiles
     call get_command_argument(number=1, value=input_tracers)
     call get_command_argument(number=2, value=input_centres)
     call get_command_argument(number=3, value=output_den)
-    call get_command_argument(number=4, value=boxchar_x)
-    call get_command_argument(number=5, value=boxchar_y)
-    call get_command_argument(number=6, value=boxchar_z)
-    call get_command_argument(number=7, value=dmin_char)
-    call get_command_argument(number=8, value=dmax_char)
-    call get_command_argument(number=9, value=rfilter_char)
-    call get_command_argument(number=10, value=ngridchar_x)
-    call get_command_argument(number=11, value=ngridchar_y)
-    call get_command_argument(number=12, value=ngridchar_z)
-    call get_command_argument(number=13, value=qperp_char, status=argstat1)
-    call get_command_argument(number=14, value=qpara_char, status=argstat2)
+    call get_command_argument(number=4, value=boxchar)
+    call get_command_argument(number=5, value=dmin_char)
+    call get_command_argument(number=6, value=dmax_char)
+    call get_command_argument(number=7, value=rfilter_char)
+    call get_command_argument(number=8, value=ngridchar)
+    call get_command_argument(number=9, value=qperp_char, status=argstat1)
+    call get_command_argument(number=10, value=qpara_char, status=argstat2)
     
-    read(boxchar_x, *) boxsize_x
-    read(boxchar_y, *) boxsize_y
-    read(boxchar_z, *) boxsize_z
+    read(boxchar, *) boxsize
     read(dmin_char, *) dmin
     read(dmax_char, *) dmax
     read(rfilter_char, *) rfilter
-    read(ngridchar_x, *) ngrid_x
-    read(ngridchar_y, *) ngrid_y
-    read(ngridchar_z, *) ngrid_z
+    read(ngridchar, *) ngrid
 
     if (argstat1 == 0 .and. argstat2 == 0) then
       read(qperp_char, *) qperp
@@ -91,16 +79,12 @@ program density_profiles
     write(*,*) ''
     write(*, *) 'input_tracers: ', trim(input_tracers)
     write(*, *) 'input_centres: ', trim(input_centres)
-    write(*, *) 'boxsize_x: ', trim(boxchar_x)
-    write(*, *) 'boxsize_y: ', trim(boxchar_y)
-    write(*, *) 'boxsize_z: ', trim(boxchar_z)
+    write(*, *) 'boxsize: ', trim(boxchar)
     write(*, *) 'output_den: ', trim(output_den)
     write(*, *) 'dmin: ', trim(dmin_char), ' Mpc'
     write(*, *) 'dmax: ', trim(dmax_char), ' Mpc'
     write(*, *) 'rfilter: ', trim(rfilter_char), 'Mpc'
-    write(*, *) 'ngrid_x: ', trim(ngridchar_x)
-    write(*, *) 'ngrid_y: ', trim(ngridchar_y)
-    write(*, *) 'ngrid_z: ', trim(ngridchar_z)
+    write(*, *) 'ngrid: ', trim(ngridchar)
     write(*,*) ''
   
     open(10, file=input_tracers, status='old', form='unformatted')
@@ -128,9 +112,13 @@ program density_profiles
     write(*,*) 'centres(min), centres(max) = ', minval(centres(1,:)), maxval(centres(1,:))
 
     ! Account for potential geometrical distortions
-    boxsize_x = boxsize_x / qperp
-    boxsize_y = boxsize_y / qperp
-    boxsize_z = boxsize_z / qpara
+    boxsize_x = boxsize / qperp
+    boxsize_y = boxsize / qperp
+    boxsize_z = boxsize / qpara
+
+    ngrid_x = ngrid / qperp
+    ngrid_y = ngrid / qperp
+    ngrid_z = ngrid / qpara
 
     tracers(1,:) = tracers(1,:) / qperp
     tracers(2,:) = tracers(2,:) / qperp
@@ -251,7 +239,6 @@ program density_profiles
                   DD(i) = DD(i) + 1
                 end if
   
-    
                 if(ii.eq.lirst(ix2,iy2,iz2)) exit
     
               end do
