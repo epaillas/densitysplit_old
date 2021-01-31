@@ -4,11 +4,11 @@ import click
 
 # read file name from command line
 @click.command()
-@click.option('--centres_file', type=str, required=True)
-@click.option('--filter_file', type=str, required=True)
+@click.option('--centres_filename', type=str, required=True)
+@click.option('--filter_filename', type=str, required=True)
 @click.option('--quantiles', type=int, required=True)
-def split_positions(centres_file,
-                    filter_file,
+def split_positions(centres_filename,
+                    filter_filename,
                     quantiles):
 
     '''
@@ -16,12 +16,12 @@ def split_positions(centres_file,
     according to the local galaxy density.
     '''
     print('\nSplitting positions using the following arguments:')
-    print('centres: {}'.format(centres_file))
-    print('filter_file: {}'.format(filter_file))
+    print('centres: {}'.format(centres_filename))
+    print('filter_filename: {}'.format(filter_filename))
     print('quantiles: {}'.format(quantiles))
 
     # open centres file and get dimensions
-    f = FortranFile(centres_file, 'r')
+    f = FortranFile(centres_filename, 'r')
     nrows = f.read_ints()[0]
     ncols = f.read_ints()[0]
     print('nrows, ncols= ({}, {})'.format(nrows, ncols))
@@ -30,7 +30,7 @@ def split_positions(centres_file,
     f.close()
 
     # open filter file
-    f = FortranFile(filter_file, 'r')
+    f = FortranFile(filter_filename, 'r')
     ncentres = f.read_ints()[0]
     print('ncentres: {}'.format(ncentres))
     smoothed_delta = f.read_reals(dtype=np.float64)
@@ -45,7 +45,7 @@ def split_positions(centres_file,
     for i in range(1, quantiles + 1):
         binned_centres['den{}'.format(i)] = sorted_centres[int((i-1)*ncentres/quantiles):int(i*ncentres/quantiles)]
 
-        output_file = centres_file + '.DS{}'.format(i)
+        output_file = centres_filename + '.DS{}'.format(i)
         cout = binned_centres['den{}'.format(i)]
         print('Shape of cout: {}'.format(np.shape(cout)))
         f = FortranFile(output_file, 'w')
