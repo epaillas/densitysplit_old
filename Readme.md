@@ -21,16 +21,19 @@ Example of usage:
 
 Input arguments:
 
-    --data_filename: type str, name of the file where tracer positions are stored. Must be a Fortran 90 unformatted file. To convert from an ASCII text file, use ascii_to_unformatted.py
-    --filter_filename: type str, name of the file where the filtered densities will be stored
-    --boxsize: type float, size of the simulation box
-    --ngrid: type int, number of cells to divide the simulation box to ease up calculations (100 cells for a 1 Gpc box is a good number)
-    --filter_type: type str, can be either 'tophat', or 'gaussian'
-    --filter_size: size of the filter (e.g. 15 Mpc/h in Paillas et al. 2021
-    --dmin: type float, optional,  minimum distance for the filter calculation. Defaults to zero. I suggest to leave this unchanged unless you know what you're doing
-    --dmax: type float, optional, maximum distance for the filter calculation. Defaults to filter_size for a tophat filter, or 5*filter_size for a Gaussian filter. I suggest to leave this unchanged unless you know what you're doing
-    --qperp: type float, optional, defaults to 1, adds geometrical distortion parameter along the perpendicular direction. 
-    --qpara: type float, optional, defaults to 1, adds geometrical distortion parameter along the line of sight
+* data_filename: type str, name of the file where tracer positions are stored. Must be a Fortran 90 unformatted file. To convert from an ASCII text file, use ascii_to_unformatted.py
+* filter_filename: type str, name of the file where the filtered densities will be stored
+* boxsize: type float, size of the simulation box
+* ngrid: type int, number of cells to divide the simulation box to ease up calculations (100 cells for a 1 Gpc box is a good number)
+* filter_type: type str, can be either 'tophat', or 'gaussian'
+* filter_size: size of the filter (e.g. 15 Mpc/h in Paillas et al. 2021
+* dmin: type float, optional,  minimum distance for the filter calculation. Defaults to zero. I suggest to leave this unchanged unless you know what you're doing
+* dmax: type float, optional, maximum distance for the filter calculation. Defaults to filter_size for a tophat filter, or 5*filter_size for a Gaussian filter. I suggest to leave this unchanged unless you know what you're doing
+* qperp: type float, optional, defaults to 1, adds geometrical distortion parameter along the perpendicular direction. 
+* qpara: type float, optional, defaults to 1, adds geometrical distortion parameter along the line of sight
+
+Example of usage:  
+`python calculate_filter.py --data_filename data.dat --filter_filename filter.dat --boxsize 1500 --ngrid 100 --filter_type tophat --filter_size 15`
 
 
 **3) split_positions.py**: splits the positions in different quantiles by using the chosen filter
