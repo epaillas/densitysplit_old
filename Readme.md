@@ -13,7 +13,7 @@ Input arguments:
 * boxsize: type float, size of the simulation box
 * data_filename: type str, optional, name of the file where tracer positions are stored. Must be a Fortran 90 unformatted file. To convert from an ASCII text file, use ascii_to_unformatted.py
 
-Example of usage:
+Example of usage:  
 `python generate_positions.py --centres_filename centres.dat --npositions 10000 --sampling tophat`
     
 
@@ -41,7 +41,7 @@ Input arguments:
 * filter_filename: type str, name of the file where the filtered densities are stored (calculated from calculate_filter.py)
 * quantiles: type int, number of quantiles for the split
 
-Example of usage
+Example of usage:  
 `python split_positions.py --centres_filename centres.dat --filter_filename filter.dat --quantiles 5`
 
 
