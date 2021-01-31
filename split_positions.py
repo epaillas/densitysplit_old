@@ -45,7 +45,7 @@ def split_positions(centres_filename,
     for i in range(1, quantiles + 1):
         binned_centres['den{}'.format(i)] = sorted_centres[int((i-1)*ncentres/quantiles):int(i*ncentres/quantiles)]
 
-        output_file = centres_filename + '.DS{}'.format(i)
+        output_file = centres_filename.split('.unf')[0] + '_DS{}'.format(i) + '.unf'
         cout = binned_centres['den{}'.format(i)]
         print('Shape of cout: {}'.format(np.shape(cout)))
         f = FortranFile(output_file, 'w')
