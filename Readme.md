@@ -6,15 +6,11 @@ This set of codes can be used to split the galaxy density field in different qua
 
 Input arguments:
 
---centres_filename: type str, name of the output file where the random positions will be stored
-
---npositions: type int, number of random positions to be generated
-
+*--centres_filename: type str, name of the output file where the random positions will be stored
+*--npositions: type int, number of random positions to be generated
 --sampling: type str, how to sample the random positions; 'uniform' for a uniform disitribution across 
             the simulation volume, or 'tracers' to randomly sample from tracer positions 
-
 --boxsize: type float, size of the simulation box
-
 --data_filename: type str, optional, name of the file where tracer positions are stored. Must be a Fortran 90 unformatted file. To convert from an ASCII text file, use ascii_to_unformatted.py
     
 
