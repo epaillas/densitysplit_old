@@ -33,7 +33,7 @@ def calculate_filter(data_filename,
                         dmax = 5 * filter_size
 
         logfile = filter_filename + '.log'
-        binpath = sys.path[0] + '/bin/{}.exe'.format(filter_type)
+        binpath = sys.path[0] + '/bin/{}_filter.exe'.format(filter_type)
 
         cmd = [binpath,
                 data_filename,
