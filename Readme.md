@@ -6,12 +6,14 @@ This set of codes can be used to split the galaxy density field in different qua
 
 Input arguments:
 
-* --centres_filename: type str, name of the output file where the random positions will be stored
-* --npositions: type int, number of random positions to be generated
---sampling: type str, how to sample the random positions; 'uniform' for a uniform disitribution across 
+* centres_filename: type str, name of the output file where the random positions will be stored
+* npositions: type int, number of random positions to be generated
+* sampling: type str, how to sample the random positions; 'uniform' for a uniform disitribution across 
             the simulation volume, or 'tracers' to randomly sample from tracer positions 
---boxsize: type float, size of the simulation box
---data_filename: type str, optional, name of the file where tracer positions are stored. Must be a Fortran 90 unformatted file. To convert from an ASCII text file, use ascii_to_unformatted.py
+* boxsize: type float, size of the simulation box
+* data_filename: type str, optional, name of the file where tracer positions are stored. Must be a Fortran 90 unformatted file. To convert from an ASCII text file, use ascii_to_unformatted.py
+
+Example of usage: `python generate_positions.py --centres_filename centres.dat --npositions 10000 --sampling tophat`
     
 
 **2) calculate_filter.py**: calculates the integrated galaxy density at a given distance for each random position
