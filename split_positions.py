@@ -10,7 +10,7 @@ import click
 @click.option('--quantiles', type=int, required=True)
 def split_positions(centres_filename,
                     filter_filename,
-                    handle
+                    handle,
                     quantiles):
 
     '''
