@@ -6,9 +6,11 @@ import click
 @click.command()
 @click.option('--centres_filename', type=str, required=True)
 @click.option('--filter_filename', type=str, required=True)
+@click.option('--handle', type=str)
 @click.option('--quantiles', type=int, required=True)
 def split_positions(centres_filename,
                     filter_filename,
+                    handle
                     quantiles):
 
     '''
@@ -45,7 +47,10 @@ def split_positions(centres_filename,
     for i in range(1, quantiles + 1):
         binned_centres['den{}'.format(i)] = sorted_centres[int((i-1)*ncentres/quantiles):int(i*ncentres/quantiles)]
 
-        output_file = centres_filename.split('.unf')[0] + '_DS{}'.format(i) + '.unf'
+        if handle != None:
+            output_file = handle + '_DS{}'.format(i) + '.unf'
+        else:
+            output_file = centres_filename.split('.unf')[0] + '_DS{}'.format(i) + '.unf'
         cout = binned_centres['den{}'.format(i)]
         print('Shape of cout: {}'.format(np.shape(cout)))
         f = FortranFile(output_file, 'w')

@@ -43,6 +43,7 @@ Input arguments:
 * centres_filename: type str, name of the file where random positions are stored.
 * filter_filename: type str, name of the file where the filtered densities are stored (calculated from calculate_filter.py)
 * quantiles: type int, number of quantiles for the split
+* handle: type str, optional, basename for the output file
 
 Example of usage:  
 `python split_positions.py --centres_filename centres.dat --filter_filename filter.dat --quantiles 5`
