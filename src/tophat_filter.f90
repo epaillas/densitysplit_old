@@ -1,7 +1,7 @@
 program density_profiles
     implicit none
     
-    real*8 :: rgrid_x, rgrid_y, rgrid_z, vol, rhomed
+    real*8 :: rgrid_x, rgrid_y, rgrid_z, vol, rhomean
     real*8 :: boxsize, boxsize_x, boxsize_y, boxsize_z
     real*8 :: disx, disy, disz, dis
     real*8 :: xvc, yvc, zvc
@@ -13,7 +13,7 @@ program density_profiles
     integer*8 :: i, ii, ix, iy, iz, ix2, iy2, iz2
     integer*8 :: indx, indy, indz, nrows, ncols
     integer*8 :: ipx, ipy, ipz, ndif_x, ndif_y, ndif_z
-    integer*8 :: ngrid, ngrid_x, ngrid_y, ngrid_z
+    integer*8 :: ngrid
     integer*4 :: argstat1, argstat2
     
     integer*8, dimension(:, :, :), allocatable :: lirst, nlirst
@@ -32,7 +32,7 @@ program density_profiles
     character(len=10) :: ngridchar
     character(len=10) :: qperp_char, qpara_char
     
-    if (iargc() .lt. 10) then
+    if (iargc() .lt. 8) then
         write(*,*) 'Some arguments are missing.'
         write(*,*) '1) input_data'
         write(*,*) '2) input_centres'
@@ -116,10 +116,6 @@ program density_profiles
     boxsize_y = boxsize / qperp
     boxsize_z = boxsize / qpara
 
-    ngrid_x = ngrid / qperp
-    ngrid_y = ngrid / qperp
-    ngrid_z = ngrid / qpara
-
     tracers(1,:) = tracers(1,:) / qperp
     tracers(2,:) = tracers(2,:) / qperp
     tracers(3,:) = tracers(3,:) / qpara
@@ -143,17 +139,17 @@ program density_profiles
     allocate(delta(nc))
     
     ! Mean density inside the box
-    rhomed = ng / (boxsize_x * boxsize_y * boxsize_z)
+    rhomean = ng / (boxsize_x * boxsize_y * boxsize_z)
     
     ! Construct linked list for tracers
     write(*,*) ''
     write(*,*) 'Constructing linked list...'
-    allocate(lirst(ngrid_x, ngrid_y, ngrid_z))
-    allocate(nlirst(ngrid_x, ngrid_y, ngrid_z))
+    allocate(lirst(ngrid, ngrid, ngrid))
+    allocate(nlirst(ngrid, ngrid, ngrid))
     allocate(ll(ng))
-    rgrid_x = (boxsize_x) / real(ngrid_x)
-    rgrid_y = (boxsize_y) / real(ngrid_y)
-    rgrid_z = (boxsize_z) / real(ngrid_z)
+    rgrid_x = (boxsize_x) / real(ngrid)
+    rgrid_y = (boxsize_y) / real(ngrid)
+    rgrid_z = (boxsize_z) / real(ngrid)
     
     lirst = 0
     ll = 0
@@ -163,11 +159,11 @@ program density_profiles
       indy = int((tracers(2, i)) / rgrid_y + 1.)
       indz = int((tracers(3, i)) / rgrid_z + 1.)
     
-      if(indx.gt.0.and.indx.le.ngrid_x.and.indy.gt.0.and.indy.le.ngrid_y.and.&
-      indz.gt.0.and.indz.le.ngrid_z)lirst(indx,indy,indz)=i
+      if(indx.gt.0.and.indx.le.ngrid.and.indy.gt.0.and.indy.le.ngrid.and.&
+      indz.gt.0.and.indz.le.ngrid)lirst(indx,indy,indz)=i
     
-      if(indx.gt.0.and.indx.le.ngrid_x.and.indy.gt.0.and.indy.le.ngrid_y.and.&
-      indz.gt.0.and.indz.le.ngrid_z)nlirst(indx,indy,indz) = &
+      if(indx.gt.0.and.indx.le.ngrid.and.indy.gt.0.and.indy.le.ngrid.and.&
+      indz.gt.0.and.indz.le.ngrid)nlirst(indx,indy,indz) = &
       nlirst(indx, indy, indz) + 1
     end do
     
@@ -175,8 +171,8 @@ program density_profiles
       indx = int((tracers(1, i))/ rgrid_x + 1.)
       indy = int((tracers(2, i))/ rgrid_y + 1.)
       indz = int((tracers(3, i))/ rgrid_z + 1.)
-      if(indx.gt.0.and.indx.le.ngrid_x.and.indy.gt.0.and.indy.le.ngrid_y.and.&
-      &indz.gt.0.and.indz.le.ngrid_z) then
+      if(indx.gt.0.and.indx.le.ngrid.and.indy.gt.0.and.indy.le.ngrid.and.&
+      &indz.gt.0.and.indz.le.ngrid) then
         ll(lirst(indx,indy,indz)) = i
         lirst(indx,indy,indz) = i
       endif
@@ -210,12 +206,12 @@ program density_profiles
             iy2 = iy
             iz2 = iz
     
-            if (ix2 .gt. ngrid_x) ix2 = ix2 - ngrid_x
-            if (ix2 .lt. 1) ix2 = ix2 + ngrid_x
-            if (iy2 .gt. ngrid_y) iy2 = iy2 - ngrid_y
-            if (iy2 .lt. 1) iy2 = iy2 + ngrid_y
-            if (iz2 .gt. ngrid_z) iz2 = iz2 - ngrid_z
-            if (iz2 .lt. 1) iz2 = iz2 + ngrid_z
+            if (ix2 .gt. ngrid) ix2 = ix2 - ngrid
+            if (ix2 .lt. 1) ix2 = ix2 + ngrid
+            if (iy2 .gt. ngrid) iy2 = iy2 - ngrid
+            if (iy2 .lt. 1) iy2 = iy2 + ngrid
+            if (iz2 .gt. ngrid) iz2 = iz2 - ngrid
+            if (iz2 .lt. 1) iz2 = iz2 + ngrid
     
             ii = lirst(ix2,iy2,iz2)
             if(ii.ne.0) then
@@ -249,7 +245,7 @@ program density_profiles
   
   
     vol = 4./3 * pi * (dmax ** 3 - dmin ** 3)
-    delta(i) = DD(i) / (vol * rhomed) - 1
+    delta(i) = DD(i) / (vol * rhomean) - 1
   
     end do
     
